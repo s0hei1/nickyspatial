@@ -78,7 +78,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- Inspired by the functionality of eCognition and other OBIA software
+- Inspired by the functionality of eCognition and other OBIA methodologies
 - Built on top of powerful open-source libraries like numpy, rasterio, scikit-image, and GeoPandas
 
 #### **Nicky** is my belated dog and I named this package on his memory ! 
