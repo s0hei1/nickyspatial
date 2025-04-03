@@ -48,6 +48,12 @@ class RuleSet:
         self.name = name if name else "RuleSet"
         self.rules = []
 
+    @staticmethod
+    def wrap_condition_parts_simple(self, condition):
+        parts = condition.split("&")
+        parts = [f"({part.strip()})" for part in parts]
+        return " & ".join(parts)
+
     def add_rule(self, name, condition, class_value=None):
         """
         Add a rule to the rule set.
@@ -134,7 +140,7 @@ class RuleSet:
                     or f"{result_field} !=" in rule.condition
                     or f"{result_field}!=" in rule.condition
                 ):
-
+                    ## TODO : better way to handle this , because & searching in string is not a good idea, this might produce bug for complex rules
                     eval_condition = rule.condition.replace("&", " and ").replace(
                         "|", " or "
                     )
@@ -164,9 +170,6 @@ class RuleSet:
                             False
                         )
                     except Exception as e:
-                        print(
-                            f"Warning: Falling back to pandas evaluation for rule '{rule.name}': {str(e)}"
-                        )
                         mask = result_layer.objects.eval(
                             rule.condition, engine="python"
                         )
