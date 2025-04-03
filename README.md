@@ -79,8 +79,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Inspired by the functionality of eCognition and other OBIA software
-- Built on top of powerful open-source libraries like GDAL, scikit-image, and GeoPandas
+- Built on top of powerful open-source libraries like numpy, rasterio, scikit-image, and GeoPandas
 
-**Nicky** is my belated dog and I named this package on his memory ! 
+#### **Nicky** is my belated dog and I named this package on his memory ! 
 
 ![image](https://github.com/user-attachments/assets/b5b86c63-ae5a-48b4-9d45-3bb34a58a102)
