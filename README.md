@@ -2,6 +2,9 @@
 
 An open-source object-based image analysis library for remote sensing. 
 
+> [!WARNING]
+> This project is under active development and lot of its functionality is still in my head yet to code.
+
 ## Description
 
 NickySpatial is a Python package that provides object-based image analysis (OBIA) functionality similar to commercial software like eCognition. It allows users to segment geospatial imagery into meaningful objects, calculate statistics, and apply rule-based classification.
