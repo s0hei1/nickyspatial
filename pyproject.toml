@@ -14,3 +14,8 @@ dependencies = [
     "scipy>=1.15.2",
     "seaborn>=0.13.2",
 ]
+
+[dependency-groups]
+dev = [
+    "commitizen>=4.4.1",
+]
