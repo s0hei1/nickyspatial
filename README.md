@@ -1,6 +1,6 @@
 # NickySpatial
 
-An open-source object-based image analysis package for remote sensing. 
+An open-source object-based image analysis library for remote sensing. 
 
 ## Description
 

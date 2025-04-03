@@ -1,7 +1,7 @@
 # nickyspatial/__init__.py
 
 """
-NickySpatial: An open-source object-based image analysis package for remote sensing
+NickySpatial: An open-source object-based image analysis library for remote sensing
 =========================================================================
 
 NickySpatial is a Python package for object-based image analysis,

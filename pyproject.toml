@@ -1,7 +1,7 @@
 [project]
 name = "nickyspatial"
 version = "0.0.2"
-description = "An open-source object-based image analysis package for remote sensing."
+description = "An open-source object-based image analysis library for remote sensing."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
