@@ -63,7 +63,7 @@ For detailed documentation and examples, see the [documentation website](#).
 
 ## Examples
 
-Check out the examples directory for more detailed examples:
+Check out the [examples](./examples/) directory for more examples:
  
 
 TODO : Add example scripts here 
