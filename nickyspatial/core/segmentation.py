@@ -10,8 +10,7 @@ from .layer import Layer
 
 
 class MultiResolutionSegmentation:
-    """
-    Implementation of ChessBoard segmentation algorithm for remote sensing imagery.
+    """Implementation of ChessBoard segmentation algorithm for remote sensing imagery.
 
     This algorithm segments an image using a bottom-up region-growing approach
     that optimizes the homogeneity of pixel values within segments while
@@ -19,8 +18,7 @@ class MultiResolutionSegmentation:
     """
 
     def __init__(self, scale=15, compactness=0.6):
-        """
-        Initialize the segmentation algorithm.
+        """Initialize the segmentation algorithm.
 
         Parameters:
         -----------
@@ -38,8 +36,7 @@ class MultiResolutionSegmentation:
         self.compactness = compactness
 
     def execute(self, image_data, transform, crs, layer_manager=None, layer_name=None):
-        """
-        Perform segmentation and create a layer with the results.
+        """Perform segmentation and create a layer with the results.
 
         Parameters:
         -----------
@@ -105,7 +102,7 @@ class MultiResolutionSegmentation:
         segment_objects = self._create_segment_objects(segments, transform, crs)
         layer.objects = segment_objects
 
-        bands = [f"band_{i+1}" for i in range(num_bands)]
+        bands = [f"band_{i + 1}" for i in range(num_bands)]
         self._calculate_statistics(layer, image_data, bands)
 
         if layer_manager:
@@ -114,8 +111,7 @@ class MultiResolutionSegmentation:
         return layer
 
     def _create_segment_objects(self, segments, transform, crs):
-        """
-        Create vector objects from segments.
+        """Create vector objects from segments.
 
         Parameters:
         -----------
@@ -142,9 +138,7 @@ class MultiResolutionSegmentation:
             if not np.any(mask):
                 continue
 
-            shapes = rasterio.features.shapes(
-                mask.astype(np.int16), mask=mask, transform=transform
-            )
+            shapes = rasterio.features.shapes(mask.astype(np.int16), mask=mask, transform=transform)
 
             segment_polygons = []
             for geom, val in shapes:
@@ -180,8 +174,7 @@ class MultiResolutionSegmentation:
         return gdf
 
     def _calculate_statistics(self, layer, image_data, bands):
-        """
-        Calculate statistics for segments based on image data.
+        """Calculate statistics for segments based on image data.
 
         Parameters:
         -----------
@@ -220,9 +213,7 @@ class MultiResolutionSegmentation:
                 max_val = float(np.max(segment_pixels))
                 median_val = float(np.median(segment_pixels))
 
-                idx = segment_objects.index[
-                    segment_objects["segment_id"] == segment_id
-                ].tolist()[0]
+                idx = segment_objects.index[segment_objects["segment_id"] == segment_id].tolist()[0]
                 segment_objects.at[idx, f"{band_name}_mean"] = mean_val
                 segment_objects.at[idx, f"{band_name}_std"] = std_val
                 segment_objects.at[idx, f"{band_name}_min"] = min_val

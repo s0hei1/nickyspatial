@@ -2,8 +2,7 @@ import numpy as np
 
 
 def attach_area_stats(layer, area_column="area_units", by_class=None):
-    """
-    Calculate area statistics for objects in a layer.
+    """Calculate area statistics for objects in a layer.
 
     Parameters:
     -----------
@@ -59,8 +58,7 @@ def attach_area_stats(layer, area_column="area_units", by_class=None):
 
 
 def attach_shape_metrics(layer):
-    """
-    Calculate shape metrics for objects in a layer.
+    """Calculate shape metrics for objects in a layer.
 
     Parameters:
     -----------
@@ -81,18 +79,13 @@ def attach_shape_metrics(layer):
         layer.objects["area_units"] = layer.objects.geometry.area
 
     layer.objects["shape_index"] = (
-        (
-            layer.objects["perimeter"]
-            / (2 * np.sqrt(np.pi * layer.objects["area_units"]))
-        )
+        (layer.objects["perimeter"] / (2 * np.sqrt(np.pi * layer.objects["area_units"])))
         .replace([np.inf, -np.inf], np.nan)
         .fillna(0)
     )
 
     layer.objects["compactness"] = (
-        (4 * np.pi * layer.objects["area_units"] / (layer.objects["perimeter"] ** 2))
-        .replace([np.inf, -np.inf], np.nan)
-        .fillna(0)
+        (4 * np.pi * layer.objects["area_units"] / (layer.objects["perimeter"] ** 2)).replace([np.inf, -np.inf], np.nan).fillna(0)
     )
 
     metrics = {
@@ -114,8 +107,7 @@ def attach_shape_metrics(layer):
 
 
 def attach_neighbor_stats(layer):
-    """
-    Calculate neighborhood statistics for objects in a layer.
+    """Calculate neighborhood statistics for objects in a layer.
 
     Parameters:
     -----------

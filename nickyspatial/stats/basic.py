@@ -2,8 +2,7 @@ import numpy as np
 
 
 def attach_basic_stats(layer, column, prefix=None):
-    """
-    Attach basic statistics for a column to a layer.
+    """Attach basic statistics for a column to a layer.
 
     Parameters:
     -----------
@@ -43,8 +42,7 @@ def attach_basic_stats(layer, column, prefix=None):
 
 
 def attach_count(layer, class_column="classification", class_value=None):
-    """
-    Count objects in a layer, optionally filtered by class.
+    """Count objects in a layer, optionally filtered by class.
 
     Parameters:
     -----------
@@ -72,8 +70,7 @@ def attach_count(layer, class_column="classification", class_value=None):
 
 
 def attach_class_distribution(layer, class_column="classification"):
-    """
-    Calculate the distribution of classes in a layer.
+    """Calculate the distribution of classes in a layer.
 
     Parameters:
     -----------

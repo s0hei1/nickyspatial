@@ -4,16 +4,14 @@ import pandas as pd
 
 
 class Layer:
-    """
-    A Layer represents a set of objects (segments or classification results) with associated properties.
+    """A Layer represents a set of objects (segments or classification results) with associated properties.
 
     Layers can be derived from segmentation, rule application, or filters.
     Each layer can have functions attached to calculate additional properties.
     """
 
     def __init__(self, name=None, parent=None, type="generic"):
-        """
-        Initialize a Layer.
+        """Initialize a Layer.
 
         Parameters:
         -----------
@@ -39,8 +37,7 @@ class Layer:
         self.attached_functions = {}
 
     def attach_function(self, function, name=None, **kwargs):
-        """
-        Attach a function to this layer and execute it.
+        """Attach a function to this layer and execute it.
 
         Parameters:
         -----------
@@ -69,8 +66,7 @@ class Layer:
         return self
 
     def get_function_result(self, function_name):
-        """
-        Get the result of an attached function.
+        """Get the result of an attached function.
 
         Parameters:
         -----------
@@ -88,8 +84,7 @@ class Layer:
         return self.attached_functions[function_name]["result"]
 
     def copy(self):
-        """
-        Create a copy of this layer.
+        """Create a copy of this layer.
 
         Returns:
         --------
@@ -119,16 +114,11 @@ class Layer:
 
         parent_name = self.parent.name if self.parent else "None"
 
-        return (
-            f"Layer '{self.name}' (type: {self.type}, "
-            f"parent: {parent_name}, objects: {num_objects})"
-        )
+        return f"Layer '{self.name}' (type: {self.type}, parent: {parent_name}, objects: {num_objects})"
 
 
 class LayerManager:
-    """
-    Manages a collection of layers and their relationships.
-    """
+    """Manages a collection of layers and their relationships."""
 
     def __init__(self):
         """Initialize the layer manager."""
@@ -136,8 +126,7 @@ class LayerManager:
         self.active_layer = None
 
     def add_layer(self, layer, set_active=True):
-        """
-        Add a layer to the manager.
+        """Add a layer to the manager.
 
         Parameters:
         -----------
@@ -159,8 +148,7 @@ class LayerManager:
         return layer
 
     def get_layer(self, layer_id_or_name):
-        """
-        Get a layer by ID or name.
+        """Get a layer by ID or name.
 
         Parameters:
         -----------
@@ -182,8 +170,7 @@ class LayerManager:
         raise ValueError(f"Layer '{layer_id_or_name}' not found")
 
     def get_layer_names(self):
-        """
-        Get a list of all layer names.
+        """Get a list of all layer names.
 
         Returns:
         --------
@@ -193,8 +180,7 @@ class LayerManager:
         return [layer.name for layer in self.layers.values()]
 
     def remove_layer(self, layer_id_or_name):
-        """
-        Remove a layer from the manager.
+        """Remove a layer from the manager.
 
         Parameters:
         -----------

@@ -10,8 +10,7 @@ def enhance_contrast(
     layer_manager=None,
     layer_name=None,
 ):
-    """
-    Enhance contrast in source layer raster data.
+    """Enhance contrast in source layer raster data.
 
     Parameters:
     -----------
@@ -40,9 +39,7 @@ def enhance_contrast(
     result_layer = Layer(name=layer_name, parent=source_layer, type="filter")
     result_layer.transform = source_layer.transform
     result_layer.crs = source_layer.crs
-    result_layer.objects = (
-        source_layer.objects.copy() if source_layer.objects is not None else None
-    )
+    result_layer.objects = source_layer.objects.copy() if source_layer.objects is not None else None
 
     result_layer.metadata = {
         "filter_type": "enhance_contrast",
@@ -67,8 +64,7 @@ def enhance_contrast(
 
 
 def spectral_filter(source_layer, expression, layer_manager=None, layer_name=None):
-    """
-    Apply a spectral filter based on a mathematical expression.
+    """Apply a spectral filter based on a mathematical expression.
 
     Parameters:
     -----------
@@ -100,9 +96,7 @@ def spectral_filter(source_layer, expression, layer_manager=None, layer_name=Non
     objects = source_layer.objects.copy()
 
     try:
-        local_dict = {
-            col: objects[col].values for col in objects.columns if col != "geometry"
-        }
+        local_dict = {col: objects[col].values for col in objects.columns if col != "geometry"}
         mask = ne.evaluate(expression, local_dict=local_dict)
         mask = np.array(mask, dtype=bool)
 
@@ -117,7 +111,7 @@ def spectral_filter(source_layer, expression, layer_manager=None, layer_name=Non
             result_layer.raster = segments_raster
 
     except Exception as e:
-        raise ValueError(f"Error applying spectral filter: {str(e)}")
+        raise ValueError(f"Error applying spectral filter: {str(e)}") from e
 
     if layer_manager:
         layer_manager.add_layer(result_layer)

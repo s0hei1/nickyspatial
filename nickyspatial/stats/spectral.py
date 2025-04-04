@@ -1,11 +1,8 @@
 import numpy as np
 
 
-def attach_ndvi(
-    layer, nir_column="NIR_mean", red_column="Red_mean", output_column="NDVI"
-):
-    """
-    Calculate NDVI (Normalized Difference Vegetation Index) for objects in a layer.
+def attach_ndvi(layer, nir_column="NIR_mean", red_column="Red_mean", output_column="NDVI"):
+    """Calculate NDVI (Normalized Difference Vegetation Index) for objects in a layer.
 
     Parameters:
     -----------
@@ -23,11 +20,7 @@ def attach_ndvi(
     ndvi_stats : dict
         Dictionary with NDVI statistics
     """
-    if (
-        layer.objects is None
-        or nir_column not in layer.objects.columns
-        or red_column not in layer.objects.columns
-    ):
+    if layer.objects is None or nir_column not in layer.objects.columns or red_column not in layer.objects.columns:
         return {}
 
     nir = layer.objects[nir_column]
@@ -53,8 +46,7 @@ def attach_ndvi(
 
 
 def attach_spectral_indices(layer, bands=None):
-    """
-    Calculate multiple spectral indices for objects in a layer.
+    """Calculate multiple spectral indices for objects in a layer.
 
     Parameters:
     -----------
@@ -79,29 +71,21 @@ def attach_spectral_indices(layer, bands=None):
             "nir": "NIR_mean",
         }
 
-    for band_name, column in bands.items():
+    for _band_name, column in bands.items():
         if column not in layer.objects.columns:
-            print(
-                f"Warning: Band column '{column}' not found. Some indices may not be calculated."
-            )
+            print(f"Warning: Band column '{column}' not found. Some indices may not be calculated.")
 
     indices = {}
 
     # NDVI (Normalized Difference Vegetation Index)
     if "nir" in bands and "red" in bands:
-        if (
-            bands["nir"] in layer.objects.columns
-            and bands["red"] in layer.objects.columns
-        ):
+        if bands["nir"] in layer.objects.columns and bands["red"] in layer.objects.columns:
             ndvi = attach_ndvi(layer, bands["nir"], bands["red"], "NDVI")
             indices["NDVI"] = ndvi
 
     # NDWI (Normalized Difference Water Index)
     if "green" in bands and "nir" in bands:
-        if (
-            bands["green"] in layer.objects.columns
-            and bands["nir"] in layer.objects.columns
-        ):
+        if bands["green"] in layer.objects.columns and bands["nir"] in layer.objects.columns:
             green = layer.objects[bands["green"]]
             nir = layer.objects[bands["nir"]]
 

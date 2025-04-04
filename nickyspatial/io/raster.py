@@ -6,8 +6,7 @@ from rasterio.transform import from_origin
 
 
 def read_raster(raster_path):
-    """
-    Read a raster file and return its data, transform, and CRS.
+    """Read a raster file and return its data, transform, and CRS.
 
     Parameters:
     -----------
@@ -32,8 +31,7 @@ def read_raster(raster_path):
 
 
 def write_raster(output_path, data, transform, crs, nodata=None):
-    """
-    Write raster data to a file.
+    """Write raster data to a file.
 
     Parameters:
     -----------
@@ -72,8 +70,7 @@ def write_raster(output_path, data, transform, crs, nodata=None):
 
 
 def layer_to_raster(layer, output_path, column=None, nodata=0):
-    """
-    Save a layer to a raster file.
+    """Save a layer to a raster file.
 
     Parameters:
     -----------
@@ -105,9 +102,7 @@ def layer_to_raster(layer, output_path, column=None, nodata=0):
             raise ValueError(f"Column '{column}' not found in layer objects")
 
         objects = layer.objects
-        shapes = [
-            (geom, value) for geom, value in zip(objects.geometry, objects[column])
-        ]
+        shapes = [(geom, value) for geom, value in zip(objects.geometry, objects[column], strict=False)]
 
         if layer.raster is not None:
             if len(layer.raster.shape) == 3:
@@ -124,9 +119,7 @@ def layer_to_raster(layer, output_path, column=None, nodata=0):
             height = int((bounds[3] - bounds[1]) / resolution)
             out_shape = (height, width)
             if layer.transform is None:
-                layer.transform = from_origin(
-                    bounds[0], bounds[3], resolution, resolution
-                )
+                layer.transform = from_origin(bounds[0], bounds[3], resolution, resolution)
 
         output = np.ones(out_shape, dtype=np.float32) * nodata
 
@@ -140,6 +133,4 @@ def layer_to_raster(layer, output_path, column=None, nodata=0):
             nodata,
         )
     else:
-        raise ValueError(
-            "Layer must have either raster data or objects with a specified column"
-        )
+        raise ValueError("Layer must have either raster data or objects with a specified column")

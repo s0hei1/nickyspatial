@@ -4,8 +4,7 @@ import geopandas as gpd
 
 
 def read_vector(vector_path):
-    """
-    Read a vector file into a GeoDataFrame.
+    """Read a vector file into a GeoDataFrame.
 
     Parameters:
     -----------
@@ -21,8 +20,7 @@ def read_vector(vector_path):
 
 
 def write_vector(gdf, output_path):
-    """
-    Write a GeoDataFrame to a vector file.
+    """Write a GeoDataFrame to a vector file.
 
     Parameters:
     -----------
@@ -43,8 +41,7 @@ def write_vector(gdf, output_path):
 
 
 def layer_to_vector(layer, output_path):
-    """
-    Save a layer's objects to a vector file.
+    """Save a layer's objects to a vector file.
 
     Parameters:
     -----------

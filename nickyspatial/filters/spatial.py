@@ -5,8 +5,7 @@ from ..core.layer import Layer
 
 
 def smooth_boundaries(source_layer, iterations=1, layer_manager=None, layer_name=None):
-    """
-    Smooth segment boundaries by applying morphological operations.
+    """Smooth segment boundaries by applying morphological operations.
 
     Parameters:
     -----------
@@ -30,9 +29,7 @@ def smooth_boundaries(source_layer, iterations=1, layer_manager=None, layer_name
     result_layer = Layer(name=layer_name, parent=source_layer, type="filter")
     result_layer.transform = source_layer.transform
     result_layer.crs = source_layer.crs
-    result_layer.raster = (
-        source_layer.raster.copy() if source_layer.raster is not None else None
-    )
+    result_layer.raster = source_layer.raster.copy() if source_layer.raster is not None else None
 
     result_layer.metadata = {
         "filter_type": "smooth_boundaries",
@@ -46,9 +43,7 @@ def smooth_boundaries(source_layer, iterations=1, layer_manager=None, layer_name
         smoothed_geom = geom
         for _ in range(iterations):
             buffer_distance = np.sqrt(smoothed_geom.area) * 0.01
-            smoothed_geom = smoothed_geom.buffer(-buffer_distance).buffer(
-                buffer_distance * 2
-            )
+            smoothed_geom = smoothed_geom.buffer(-buffer_distance).buffer(buffer_distance * 2)
 
         if not smoothed_geom.is_valid:
             smoothed_geom = smoothed_geom.buffer(0)
@@ -64,11 +59,8 @@ def smooth_boundaries(source_layer, iterations=1, layer_manager=None, layer_name
     return result_layer
 
 
-def merge_small_segments(
-    source_layer, min_size, attribute="area_pixels", layer_manager=None, layer_name=None
-):
-    """
-    Merge small segments with their largest neighbor.
+def merge_small_segments(source_layer, min_size, attribute="area_pixels", layer_manager=None, layer_name=None):
+    """Merge small segments with their largest neighbor.
 
     Parameters:
     -----------
@@ -106,9 +98,7 @@ def merge_small_segments(
 
     if len(small_segments) == 0:
         result_layer.objects = objects
-        result_layer.raster = (
-            source_layer.raster.copy() if source_layer.raster is not None else None
-        )
+        result_layer.raster = source_layer.raster.copy() if source_layer.raster is not None else None
 
         if layer_manager:
             layer_manager.add_layer(result_layer)
@@ -141,7 +131,7 @@ def merge_small_segments(
         segments_raster = source_layer.raster.copy()
 
         old_to_new = {}
-        for idx, obj in objects.iterrows():
+        for _idx, obj in objects.iterrows():
             old_id = obj["segment_id"]
             old_to_new[old_id] = old_id
 
@@ -176,8 +166,7 @@ def select_by_area(
     layer_manager=None,
     layer_name=None,
 ):
-    """
-    Select segments based on area.
+    """Select segments based on area.
 
     Parameters:
     -----------

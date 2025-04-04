@@ -4,8 +4,7 @@ import seaborn as sns
 
 
 def plot_histogram(layer, attribute, bins=20, figsize=(10, 6), by_class=None):
-    """
-    Plot a histogram of attribute values.
+    """Plot a histogram of attribute values.
 
     Parameters:
     -----------
@@ -37,9 +36,7 @@ def plot_histogram(layer, attribute, bins=20, figsize=(10, 6), by_class=None):
             if class_value is None:
                 continue
 
-            sns.histplot(
-                group[attribute], bins=bins, alpha=0.6, label=str(class_value), ax=ax
-            )
+            sns.histplot(group[attribute], bins=bins, alpha=0.6, label=str(class_value), ax=ax)
 
         ax.legend(title=by_class)
     else:
@@ -53,8 +50,7 @@ def plot_histogram(layer, attribute, bins=20, figsize=(10, 6), by_class=None):
 
 
 def plot_statistics(layer, stats_dict, figsize=(12, 8), kind="bar", y_log=False):
-    """
-    Plot statistics from a statistics dictionary.
+    """Plot statistics from a statistics dictionary.
 
     Parameters:
     -----------
@@ -106,9 +102,7 @@ def plot_statistics(layer, stats_dict, figsize=(12, 8), kind="bar", y_log=False)
         ax.set_title("Distribution")
 
     else:
-        stats_df = pd.DataFrame(
-            {"Metric": list(flat_stats.keys()), "Value": list(flat_stats.values())}
-        )
+        stats_df = pd.DataFrame({"Metric": list(flat_stats.keys()), "Value": list(flat_stats.values())})
 
         if kind != "line":
             stats_df = stats_df.sort_values("Value", ascending=False)
@@ -130,8 +124,7 @@ def plot_statistics(layer, stats_dict, figsize=(12, 8), kind="bar", y_log=False)
 
 
 def plot_scatter(layer, x_attribute, y_attribute, color_by=None, figsize=(10, 8)):
-    """
-    Create a scatter plot of two attributes.
+    """Create a scatter plot of two attributes.
 
     Parameters:
     -----------
@@ -151,12 +144,8 @@ def plot_scatter(layer, x_attribute, y_attribute, color_by=None, figsize=(10, 8)
     fig : matplotlib.figure.Figure
         Figure object
     """
-    if (
-        layer.objects is None
-        or x_attribute not in layer.objects.columns
-        or y_attribute not in layer.objects.columns
-    ):
-        raise ValueError(f"Attributes not found in layer objects")
+    if layer.objects is None or x_attribute not in layer.objects.columns or y_attribute not in layer.objects.columns:
+        raise ValueError("Attributes not found in layer objects")
 
     fig, ax = plt.subplots(figsize=figsize)
 

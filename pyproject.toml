@@ -15,6 +15,10 @@ dependencies = [
     "seaborn>=0.13.2",
 ]
 
+[project.urls]
+documentation = "https://kshitijrajsharma.github.io/nickyspatial"
+repository = "https://github.com/kshitijrajsharma/nickyspatial"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -23,6 +27,8 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "commitizen>=4.4.1",
+    "pre-commit>=4.2.0",
+    "ruff>=0.11.3",
 ]
 
 [tool.commitizen]
@@ -31,3 +37,27 @@ tag_format = "\"v$version\""
 version_scheme = "pep440"
 version_provider = "pep621"
 update_changelog_on_bump = true
+version_files = [
+    "pyproject.toml:version",
+    "nickyspatial/__init__.py:__version__",
+]
+
+[tool.ruff]
+fix = true
+line-length = 132
+target-version = "py310"
+exclude = [
+    ".git",
+    ".ruff_cache",
+    ".vscode",
+    "__pypackages__",
+    "build",
+    "dist",
+    "nickyspatial/__init__.py",
+]
+
+[tool.ruff.lint]
+select = ["I", "E", "W", "B", "F", "N", "Q"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

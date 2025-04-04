@@ -2,13 +2,10 @@ import json
 import os
 
 import numpy as np
-import rasterio.crs
-from rasterio.transform import from_origin
 
 
 def create_sample_data():
-    """
-    Create a synthetic 4-band (B, G, R, NIR) image for testing.
+    """Create a synthetic 4-band (B, G, R, NIR) image for testing.
 
     Returns:
     --------
@@ -19,15 +16,14 @@ def create_sample_data():
     crs : rasterio.crs.CRS
         Coordinate reference system
     """
-
     ## need to write logic for this one to create a pseduo image
 
-    return image_data, transform, crs
+    # return image_data, transform, crs
+    return None
 
 
 def calculate_statistics_summary(layer_manager, output_file=None):
-    """
-    Calculate summary statistics for all layers in a layer manager.
+    """Calculate summary statistics for all layers in a layer manager.
 
     Parameters:
     -----------
@@ -62,9 +58,7 @@ def calculate_statistics_summary(layer_manager, output_file=None):
             for col in layer.objects.columns:
                 if col.lower().endswith("class") or col.lower() == "classification":
                     class_counts = layer.objects[col].value_counts().to_dict()
-                    layer_summary[f"{col}_counts"] = {
-                        str(k): int(v) for k, v in class_counts.items() if k is not None
-                    }
+                    layer_summary[f"{col}_counts"] = {str(k): int(v) for k, v in class_counts.items() if k is not None}
 
         if layer.attached_functions:
             layer_summary["functions"] = list(layer.attached_functions.keys())
@@ -80,8 +74,7 @@ def calculate_statistics_summary(layer_manager, output_file=None):
 
 
 def get_band_statistics(image_data, band_names=None):
-    """
-    Calculate statistics for each band in a raster image.
+    """Calculate statistics for each band in a raster image.
 
     Parameters:
     -----------
@@ -101,7 +94,7 @@ def get_band_statistics(image_data, band_names=None):
         if num_bands == 4:
             band_names = ["Blue", "Green", "Red", "NIR"]
         else:
-            band_names = [f"Band_{i+1}" for i in range(num_bands)]
+            band_names = [f"Band_{i + 1}" for i in range(num_bands)]
 
     stats = {}
 
@@ -124,8 +117,7 @@ def get_band_statistics(image_data, band_names=None):
 
 
 def memory_usage(layer):
-    """
-    Estimate memory usage of a layer in MB.
+    """Estimate memory usage of a layer in MB.
 
     Parameters:
     -----------

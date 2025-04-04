@@ -14,9 +14,7 @@ def plot_layer(
     cmap="viridis",
     show_boundaries=False,
 ):
-    """
-    Plot a layer, optionally with an attribute or image backdrop.
-    """
+    """Plot a layer, optionally with an attribute or image backdrop."""
     fig, ax = plt.subplots(figsize=figsize)
 
     if title:
@@ -65,9 +63,7 @@ def plot_layer(
                 gray_norm = (gray - gray.min()) / (gray.max() - gray.min() + 1e-10)
                 base_img = np.stack([gray_norm, gray_norm, gray_norm], axis=2)
 
-            bounded = mark_boundaries(
-                base_img, layer.raster, color=(1, 1, 0), mode="thick"
-            )
+            bounded = mark_boundaries(base_img, layer.raster, color=(1, 1, 0), mode="thick")
 
             if attribute is None:
                 ax.imshow(bounded)
@@ -85,12 +81,8 @@ def plot_layer(
     return fig
 
 
-def plot_classification(
-    layer, class_field="classification", figsize=(12, 10), legend=True
-):
-    """
-    Plot classified segments with different colors for each class.
-    """
+def plot_classification(layer, class_field="classification", figsize=(12, 10), legend=True):
+    """Plot classified segments with different colors for each class."""
     fig, ax = plt.subplots(figsize=figsize)
 
     if class_field not in layer.objects.columns:
@@ -113,10 +105,7 @@ def plot_classification(
     )
 
     if legend and len(class_values) > 0:
-        patches = [
-            mpatches.Patch(color=colors[i], label=value)
-            for i, value in enumerate(class_values)
-        ]
+        patches = [mpatches.Patch(color=colors[i], label=value) for i, value in enumerate(class_values)]
         ax.legend(handles=patches, loc="upper right", title=class_field)
 
     ax.set_title(f"Classification by {class_field}")
@@ -137,9 +126,7 @@ def plot_comparison(
     figsize=(16, 8),
     title=None,
 ):
-    """
-    Plot before and after views of layers for comparison.
-    """
+    """Plot before and after views of layers for comparison."""
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
 
     if title:
@@ -149,16 +136,12 @@ def plot_comparison(
         before_layer.objects.plot(column=attribute, ax=ax1, legend=True)
         ax1.set_title(f"Before: {attribute}")
     elif class_field and class_field in before_layer.objects.columns:
-        class_values = [
-            v for v in before_layer.objects[class_field].unique() if v is not None
-        ]
+        class_values = [v for v in before_layer.objects[class_field].unique() if v is not None]
         num_classes = len(class_values)
         colors = plt.cm.tab20(np.linspace(0, 1, max(num_classes, 1)))
         cmap = ListedColormap(colors)
         class_map = {value: i for i, value in enumerate(class_values)}
-        before_layer.objects["_class_id"] = before_layer.objects[class_field].map(
-            class_map
-        )
+        before_layer.objects["_class_id"] = before_layer.objects[class_field].map(class_map)
 
         before_layer.objects.plot(
             column="_class_id",
@@ -169,10 +152,7 @@ def plot_comparison(
             legend=False,
         )
 
-        patches = [
-            mpatches.Patch(color=colors[i], label=value)
-            for i, value in enumerate(class_values)
-        ]
+        patches = [mpatches.Patch(color=colors[i], label=value) for i, value in enumerate(class_values)]
         ax1.legend(handles=patches, loc="upper right", title=class_field)
         ax1.set_title(f"Before: {class_field}")
     else:
@@ -183,16 +163,12 @@ def plot_comparison(
         after_layer.objects.plot(column=attribute, ax=ax2, legend=True)
         ax2.set_title(f"After: {attribute}")
     elif class_field and class_field in after_layer.objects.columns:
-        class_values = [
-            v for v in after_layer.objects[class_field].unique() if v is not None
-        ]
+        class_values = [v for v in after_layer.objects[class_field].unique() if v is not None]
         num_classes = len(class_values)
         colors = plt.cm.tab20(np.linspace(0, 1, max(num_classes, 1)))
         cmap = ListedColormap(colors)
         class_map = {value: i for i, value in enumerate(class_values)}
-        after_layer.objects["_class_id"] = after_layer.objects[class_field].map(
-            class_map
-        )
+        after_layer.objects["_class_id"] = after_layer.objects[class_field].map(class_map)
 
         after_layer.objects.plot(
             column="_class_id",
@@ -203,10 +179,7 @@ def plot_comparison(
             legend=False,
         )
 
-        patches = [
-            mpatches.Patch(color=colors[i], label=value)
-            for i, value in enumerate(class_values)
-        ]
+        patches = [mpatches.Patch(color=colors[i], label=value) for i, value in enumerate(class_values)]
         ax2.legend(handles=patches, loc="upper right", title=class_field)
         ax2.set_title(f"After: {class_field}")
     else:

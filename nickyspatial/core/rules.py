@@ -5,13 +5,10 @@ from .layer import Layer
 
 
 class Rule:
-    """
-    A rule defines a condition to classify segments.
-    """
+    """A rule defines a condition to classify segments."""
 
     def __init__(self, name, condition, class_value=None):
-        """
-        Initialize a rule.
+        """Initialize a rule.
 
         Parameters:
         -----------
@@ -32,13 +29,10 @@ class Rule:
 
 
 class RuleSet:
-    """
-    A collection of rules to apply to a layer.
-    """
+    """A collection of rules to apply to a layer."""
 
     def __init__(self, name=None):
-        """
-        Initialize a rule set.
+        """Initialize a rule set.
 
         Parameters:
         -----------
@@ -55,8 +49,7 @@ class RuleSet:
         return " & ".join(parts)
 
     def add_rule(self, name, condition, class_value=None):
-        """
-        Add a rule to the rule set.
+        """Add a rule to the rule set.
 
         Parameters:
         -----------
@@ -83,8 +76,7 @@ class RuleSet:
         layer_name=None,
         result_field="classification",
     ):
-        """
-        Apply rules to classify segments in a layer.
+        """Apply rules to classify segments in a layer.
 
         Parameters:
         -----------
@@ -105,14 +97,10 @@ class RuleSet:
         if not layer_name:
             layer_name = f"{source_layer.name}_{self.name}"
 
-        result_layer = Layer(
-            name=layer_name, parent=source_layer, type="classification"
-        )
+        result_layer = Layer(name=layer_name, parent=source_layer, type="classification")
         result_layer.transform = source_layer.transform
         result_layer.crs = source_layer.crs
-        result_layer.raster = (
-            source_layer.raster.copy() if source_layer.raster is not None else None
-        )
+        result_layer.raster = source_layer.raster.copy() if source_layer.raster is not None else None
 
         result_layer.objects = source_layer.objects.copy()
 
@@ -140,39 +128,29 @@ class RuleSet:
                     or f"{result_field} !=" in rule.condition
                     or f"{result_field}!=" in rule.condition
                 ):
-                    ## TODO : better way to handle this , because & searching in string is not a good idea, this might produce bug for complex rules
-                    eval_condition = rule.condition.replace("&", " and ").replace(
-                        "|", " or "
-                    )
+                    ## TODO : better way to handle this , because & searching in string is not a good idea,
+                    # this might produce bug for complex rules
+                    eval_condition = rule.condition.replace("&", " and ").replace("|", " or ")
 
                     mask = result_layer.objects.apply(
-                        lambda row: eval(
-                            eval_condition,
+                        lambda row, cond=eval_condition: eval(
+                            cond,
                             {"__builtins__": {}},
-                            {
-                                col: row[col]
-                                for col in result_layer.objects.columns
-                                if col != "geometry"
-                            },
+                            {col: row[col] for col in result_layer.objects.columns if col != "geometry"},
                         ),
                         axis=1,
                     )
+
                 else:
                     try:
                         local_dict = {
-                            col: result_layer.objects[col].values
-                            for col in result_layer.objects.columns
-                            if col != "geometry"
+                            col: result_layer.objects[col].values for col in result_layer.objects.columns if col != "geometry"
                         }
 
                         mask = ne.evaluate(rule.condition, local_dict=local_dict)
-                        mask = pd.Series(mask, index=result_layer.objects.index).fillna(
-                            False
-                        )
-                    except Exception as e:
-                        mask = result_layer.objects.eval(
-                            rule.condition, engine="python"
-                        )
+                        mask = pd.Series(mask, index=result_layer.objects.index).fillna(False)
+                    except Exception:
+                        mask = result_layer.objects.eval(rule.condition, engine="python")
 
                 result_layer.objects.loc[mask, result_field] = rule.class_value
 
