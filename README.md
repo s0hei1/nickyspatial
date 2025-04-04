@@ -43,8 +43,6 @@ nickyspatial/
 
 ## Installation
 
-This project is follows [uv](https://docs.astral.sh/uv/) for dependencies management and project publishing
-
 ```bash
 pip install nickyspatial
 ```
