@@ -2,6 +2,26 @@
 
 An open-source object-based image analysis library for remote sensing. 
 
+| **Field**             | **Details**                                                                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Project Name**      | [NickySpatial](https://github.com/kshitijrajsharma/nickyspatial)                                                                                                                                  |
+| **Description**       | An open-source object-based image analysis library for remote sensing.                                                                                                                           |
+| **Build System**      | [![uv](https://img.shields.io/badge/build-uv-blue?logo=uv&logoColor=white)](https://pypi.org/project/uv/) [![hatchling](https://img.shields.io/badge/build-hatchling-blue?logo=hatchling&logoColor=white)](https://github.com/pypa/hatchling) |
+| **Linter & Formatter**| [Ruff](https://beta.ruff.rs/) (enforced via [pre-commit](https://pre-commit.com))                                                                                                                |
+| **Documentation**     | Built with [MkDocs](https://www.mkdocs.org/) – [View Docs](https://kshitijrajsharma.github.io/nickyspatial/)                                                                                      |
+| **Tests**             | ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)                                                                                                                                   |
+| **Coverage**          | ![Coverage](https://img.shields.io/badge/Coverage-90%25-brightgreen)                                                                                                                                |
+| **Dependencies**      | ![Dependencies](https://img.shields.io/librariesio/github/kshitijrajsharma/nickyspatial)                                                                                                             |
+| **Python Version**    | ![Python](https://img.shields.io/badge/Python-3.7%2B-blue)                                                                                                                                          |
+| **PyPI Version**      | [![PyPI version](https://img.shields.io/pypi/v/nickyspatial.svg)](https://pypi.org/project/nickyspatial)                                                                                             |
+| **Downloads**         | ![Downloads](https://img.shields.io/pypi/dm/nickyspatial.svg)                                                                                                                                       |
+| **License**           | ![License](https://img.shields.io/badge/License-MIT-yellow.svg)                                                                                                                                     |
+| **GitHub Stars**      | ![GitHub Stars](https://img.shields.io/github/stars/kshitijrajsharma/nickyspatial?style=social)                                                                                                       |
+| **Issues**            | ![Issues](https://img.shields.io/github/issues/kshitijrajsharma/nickyspatial)                                                                                                                       |
+| **Latest Commit**     | [View Commit](https://github.com/kshitijrajsharma/nickyspatial/commits/master)                                                                                                                      |
+| **Donate**            | [![Donate](https://img.shields.io/badge/Donate-PayPal-blue)](https://www.paypal.me/yourlink)                                                                                                         |
+
+
 > [!WARNING]
 > This project is under active development and lot of its functionality is still in my head yet to code.
 
