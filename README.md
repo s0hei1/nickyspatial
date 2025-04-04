@@ -2,20 +2,14 @@
 
 An open-source object-based image analysis library for remote sensing. 
 
-| **Build System**      | [![uv](https://img.shields.io/badge/build-uv-blue?logo=uv&logoColor=white)](https://pypi.org/project/uv/) [![hatchling](https://img.shields.io/badge/build-hatchling-blue?logo=hatchling&logoColor=white)](https://github.com/pypa/hatchling) |
-| **Linter & Formatter**| [![Ruff](https://img.shields.io/badge/ruff-v0.0.0-blue?logo=ruff&logoColor=white)](https://beta.ruff.rs/) via [![pre-commit](https://img.shields.io/badge/pre--commit-active-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com) |
-| **Documentation**     | Built with [![MkDocs](https://img.shields.io/badge/MkDocs-Documentation-blue?logo=mkdocs&logoColor=white)](https://www.mkdocs.org/) – [View Docs](https://kshitijrajsharma.github.io/nickyspatial/) |
-| **Tests**             | ![Tests](https://img.shields.io/badge/tests-passing-brightgreen) |
-| **Coverage**          | ![Coverage](https://img.shields.io/badge/Coverage-90%25-brightgreen) |
-| **Dependencies**      | ![Dependencies](https://img.shields.io/librariesio/github/kshitijrajsharma/nickyspatial) |
-| **Python Version**    | ![Python](https://img.shields.io/badge/Python-3.10%2B-blue) |
-| **PyPI Version**      | [![PyPI version](https://img.shields.io/pypi/v/nickyspatial.svg)](https://pypi.org/project/nickyspatial) |
-| **Downloads**         | ![Downloads](https://img.shields.io/pypi/dm/nickyspatial.svg) |
-| **License**           | ![License](https://img.shields.io/badge/License-MIT-yellow.svg) |
-| **GitHub Stars**      | ![GitHub Stars](https://img.shields.io/github/stars/kshitijrajsharma/nickyspatial?style=social) |
-| **Issues**            | ![Issues](https://img.shields.io/github/issues/kshitijrajsharma/nickyspatial) |
-| **Latest Commit**     | [View Commit](https://github.com/kshitijrajsharma/nickyspatial/commits/master) |
-| **Donate**            | [![Donate](https://img.shields.io/badge/Donate-PayPal-blue)](https://www.paypal.me/yourlink) |
+| Category | Badge |
+|----------|-------|
+| **Build** | [![uv](https://img.shields.io/badge/build-uv-blue?logo=uv&logoColor=white)](https://pypi.org/project/uv/) [![hatchling](https://img.shields.io/badge/build-hatchling-blue?logo=hatchling&logoColor=white)](https://github.com/pypa/hatchling) |
+| **Code Quality** | [![Ruff](https://img.shields.io/badge/ruff-v0.11.3-blue?logo=ruff&logoColor=white)](https://beta.ruff.rs/) [![pre-commit](https://img.shields.io/badge/pre--commit-active-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com) ![Tests](https://img.shields.io/badge/tests-passing-brightgreen) ![Coverage](https://img.shields.io/badge/Coverage-90%25-brightgreen) |
+| **Documentation** | [![MkDocs](https://img.shields.io/badge/MkDocs-Documentation-blue?logo=mkdocs&logoColor=white)](https://kshitijrajsharma.github.io/nickyspatial/) |
+| **Package Info** | ![Python](https://img.shields.io/badge/Python-3.10%2B-blue) [![PyPI version](https://img.shields.io/pypi/v/nickyspatial.svg)](https://pypi.org/project/nickyspatial) ![Dependencies](https://img.shields.io/librariesio/github/kshitijrajsharma/nickyspatial) ![License](https://img.shields.io/badge/License-MIT-yellow.svg) |
+| **Community** | ![GitHub Stars](https://img.shields.io/github/stars/kshitijrajsharma/nickyspatial?style=social) ![Issues](https://img.shields.io/github/issues/kshitijrajsharma/nickyspatial) ![Downloads](https://img.shields.io/pypi/dm/nickyspatial.svg) ![Last Commit](https://img.shields.io/github/last-commit/kshitijrajsharma/nickyspatial) |
+
 > [!WARNING]
 > This project is under active development and lot of its functionality is still in my head yet to code.
 
