@@ -68,6 +68,7 @@ exclude = [
     "build",
     "dist",
     "nickyspatial/__init__.py",
+    "*.ipynb"
 ]
 
 [tool.ruff.lint]
