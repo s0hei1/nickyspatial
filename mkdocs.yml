@@ -1,0 +1,51 @@
+site_name: NickySpatial
+site_description: An open-source object-based image analysis library for remote sensing
+site_url: https://kshitijrajsharma.github.io/nickyspatial
+repo_url: https://github.com/kshitijrajsharma/nickyspatial
+repo_name: kshitijrajsharma/nickyspatial
+theme:
+  name: material
+  palette:
+    - media:
+      scheme: default
+      primary: white
+      accent: black
+
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - mdx_truly_sane_lists
+
+plugins:
+  - search
+  - mkdocs-jupyter
+  - git-revision-date-localized:
+      enable_creation_date: true
+
+nav : 
+ - Home: index.md
+ - Getting Started: 
+    - Installation: dev.md
+ - Examples:
+    - Basic: examples/simple_usecase.ipynb

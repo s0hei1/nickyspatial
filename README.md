@@ -61,7 +61,7 @@ For detailed documentation and examples, see the [documentation website](#).
 
 ## Examples
 
-Check out the [examples](./examples/) directory for more examples:
+Check out the [examples](./docs/examples/) directory for more examples:
  
 
 TODO : Add example scripts here 
@@ -75,6 +75,7 @@ Contributions are welcome! Follow [dev setup guide](./docs/dev.md) & Please feel
 - Inspired by the functionality of eCognition and other OBIA methodologies
 - Built on top of powerful open-source libraries like numpy, rasterio, scikit-image, and GeoPandas
 
-#### **Nicky** is my belated dog and I named this package on his memory ! 
+### Nicky
+**Nicky** is my belated dog and I named this package on his memory ! 
 
 ![image](https://github.com/user-attachments/assets/b5b86c63-ae5a-48b4-9d45-3bb34a58a102)
