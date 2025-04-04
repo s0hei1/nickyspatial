@@ -19,3 +19,4 @@ uv sync
 ```bash
 pre-commit install
 ```
+

@@ -202,4 +202,4 @@ def run_example(raster_path=None):
 if __name__ == "__main__":
     # run_example()
 
-    run_example("data/test_image.tif")
+    run_example("data/sample.tif")
