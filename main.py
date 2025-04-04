@@ -1,17 +1,22 @@
 import os
 
-from nickyspatial.core.layer import LayerManager
-from nickyspatial.core.rules import RuleSet
-from nickyspatial.core.segmentation import MultiResolutionSegmentation
-from nickyspatial.io.raster import layer_to_raster, read_raster
-from nickyspatial.io.vector import layer_to_vector
-from nickyspatial.stats.spatial import attach_area_stats, attach_shape_metrics
-from nickyspatial.stats.spectral import attach_ndvi, attach_spectral_indices
-from nickyspatial.viz.maps import plot_classification, plot_layer
+from nickyspatial import (
+    LayerManager,
+    MultiResolutionSegmentation,
+    RuleSet,
+    attach_area_stats,
+    attach_ndvi,
+    attach_shape_metrics,
+    attach_spectral_indices,
+    layer_to_raster,
+    layer_to_vector,
+    plot_classification,
+    plot_layer,
+    read_raster,
+)
 
 
 def run_example(raster_path=None):
-
     output_dir = "output"
     os.makedirs(output_dir, exist_ok=True)
 
@@ -23,11 +28,7 @@ def run_example(raster_path=None):
         print(f"Image dimensions: {image_data.shape}")
         print(f"Coordinate system: {crs}")
     else:
-        print("Using sample data...")
-        from nickyspatial.utils.helpers import create_sample_data
-
-        image_data, transform, crs = create_sample_data()
-
+        raise ValueError(f"Raster file not found at {raster_path}. Please provide a valid raster file.")
     print("\nPerforming segmentation...")
     segmenter = MultiResolutionSegmentation(
         scale=20,
@@ -43,9 +44,7 @@ def run_example(raster_path=None):
     )
     print(segmentation_layer)
 
-    fig1 = plot_layer(
-        segmentation_layer, image_data, rgb_bands=(3, 2, 1), show_boundaries=True
-    )
+    fig1 = plot_layer(segmentation_layer, image_data, rgb_bands=(3, 2, 1), show_boundaries=True)
     fig1.savefig(os.path.join(output_dir, "1_segmentation.png"))
 
     print("\nCalculating spectral indices...")
@@ -69,18 +68,14 @@ def run_example(raster_path=None):
         },
     )
 
-    fig2 = plot_layer(
-        segmentation_layer, attribute="NDVI", title="NDVI Values", cmap="RdYlGn"
-    )
+    fig2 = plot_layer(segmentation_layer, attribute="NDVI", title="NDVI Values", cmap="RdYlGn")
     fig2.savefig(os.path.join(output_dir, "2_ndvi.png"))
 
     print("\nCalculating shape metrics...")
 
     segmentation_layer.attach_function(attach_shape_metrics, name="shape_metrics")
 
-    layer_to_vector(
-        segmentation_layer, os.path.join(output_dir, "segmentation.geojson")
-    )
+    layer_to_vector(segmentation_layer, os.path.join(output_dir, "segmentation.geojson"))
 
     print("\nApplying land cover classification rules...")
 
@@ -97,18 +92,14 @@ def run_example(raster_path=None):
 
     land_cover_rules.add_rule(name="Other", condition="NDVI <= 0.2")
 
-    land_cover_layer = land_cover_rules.execute(
-        segmentation_layer, layer_manager=manager, layer_name="Land_Cover"
-    )
+    land_cover_layer = land_cover_rules.execute(segmentation_layer, layer_manager=manager, layer_name="Land_Cover")
 
     fig3 = plot_classification(land_cover_layer, class_field="classification")
     fig3.savefig(os.path.join(output_dir, "3_land_cover.png"))
 
     print("\nCalculating class statistics...")
 
-    land_cover_layer.attach_function(
-        attach_area_stats, name="area_by_class", by_class="classification"
-    )
+    land_cover_layer.attach_function(attach_area_stats, name="area_by_class", by_class="classification")
 
     area_stats = land_cover_layer.get_function_result("area_by_class")
 
@@ -193,9 +184,7 @@ def run_example(raster_path=None):
     print("\nExporting results...")
 
     layer_to_vector(land_cover_layer, os.path.join(output_dir, "land_cover.geojson"))
-    layer_to_vector(
-        vegetation_layer, os.path.join(output_dir, "vegetation_types.geojson")
-    )
+    layer_to_vector(vegetation_layer, os.path.join(output_dir, "vegetation_types.geojson"))
     # layer_to_vector(water_layer, os.path.join(output_dir, "water_bodies.geojson"))
 
     layer_to_raster(
@@ -207,11 +196,10 @@ def run_example(raster_path=None):
     print(f"\nResults saved to {output_dir}")
     print("Available layers:")
     for i, layer_name in enumerate(manager.get_layer_names()):
-        print(f"  {i+1}. {layer_name}")
+        print(f"  {i + 1}. {layer_name}")
 
 
 if __name__ == "__main__":
-
     # run_example()
 
     run_example("data/test_image.tif")

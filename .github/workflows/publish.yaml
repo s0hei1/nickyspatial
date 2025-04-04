@@ -1,10 +1,10 @@
-name: Publish to PyPI
+name: Run Tests
 
 on:
-  release:
-    types: [published]
-
-  workflow_dispatch:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 
 jobs:
   publish:
@@ -21,10 +21,5 @@ jobs:
       - name: Set up Python
         run: uv python install
 
-      - name: Build package
-        run: uv build --no-sources
-
-      - name: Publish to PyPI
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        run: uv publish -v dist/*
+      - name: Run tests
+        run: uv run pytest
