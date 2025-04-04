@@ -3,6 +3,20 @@ name = "nickyspatial"
 version = "0.0.2"
 description = "An open-source object-based image analysis library for remote sensing."
 readme = "README.md"
+authors = [
+    {name = "Kshitij Raj Sharma", email = "krschap@duck.com"},
+]
+license = {text = "MIT"}
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+keywords = ["remote-sensing", "obia", "object", "segmentation"]
 requires-python = ">=3.10"
 dependencies = [
     "geopandas>=1.0.1",
@@ -22,7 +36,6 @@ repository = "https://github.com/kshitijrajsharma/nickyspatial"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
 
 [dependency-groups]
 dev = [
