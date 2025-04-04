@@ -31,7 +31,7 @@ def run_example(raster_path=None):
         raise ValueError(f"Raster file not found at {raster_path}. Please provide a valid raster file.")
     print("\nPerforming segmentation...")
     segmenter = MultiResolutionSegmentation(
-        scale=20,
+        scale=40,
         compactness=1,
     )
 
