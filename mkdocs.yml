@@ -45,7 +45,7 @@ plugins:
 
 nav : 
  - Home: index.md
- - Getting Started: 
+ - Contribute: 
     - Installation: dev.md
  - Examples:
     - Basic: examples/simple_usecase.ipynb
