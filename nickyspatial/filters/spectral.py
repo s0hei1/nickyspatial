@@ -1,3 +1,12 @@
+"""Performs spectral-based manipulations of imagery, including band arithmetic and transformations.
+
+It supports generating new spectral bands or combinations to highlight specific features.
+It also includes functions for enhancing contrast and applying spectral filters based on mathematical expressions.
+This module is designed to work with raster .
+The functions here include contrast enhancement, spectral filtering, and band arithmetic.
+Not a great fan of these but might be handy sometime
+"""
+
 import numpy as np
 
 from ..core.layer import Layer

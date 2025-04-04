@@ -1,3 +1,5 @@
+"""Functions to create maps and visualize layers."""
+
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np

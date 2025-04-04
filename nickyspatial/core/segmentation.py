@@ -1,3 +1,13 @@
+"""Implements segmentation algorithms to partition images into meaningful region objects.
+
+The functions here might apply clustering or region-growing techniques, aiding object-based remote sensing analysis.
+This module includes the MultiResolutionSegmentation class, which implements a bottom-up region-growing algorithm
+for segmenting images based on pixel homogeneity and shape compactness.
+The segmentation process is designed to optimize the homogeneity of pixel values within segments.
+The class provides methods to execute the segmentation algorithm on image data and create a layer with the results.
+It also includes methods to create vector objects from segments and calculate statistics for segments based on image data.
+"""
+
 import warnings
 
 import geopandas as gpd

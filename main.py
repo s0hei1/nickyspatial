@@ -1,3 +1,8 @@
+"""Testing Working Document!
+
+Just a workspace document to test the functionality of the library.
+"""
+
 import os
 
 from nickyspatial import (
@@ -17,6 +22,7 @@ from nickyspatial import (
 
 
 def run_example(raster_path=None):
+    """Run Example."""
     output_dir = "output"
     os.makedirs(output_dir, exist_ok=True)
 

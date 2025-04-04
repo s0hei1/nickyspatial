@@ -1,3 +1,5 @@
+"""Helpers , Aren't they useful ?"""
+
 import json
 import os
 
@@ -91,10 +93,7 @@ def get_band_statistics(image_data, band_names=None):
     num_bands = image_data.shape[0]
 
     if band_names is None:
-        if num_bands == 4:
-            band_names = ["Blue", "Green", "Red", "NIR"]
-        else:
-            band_names = [f"Band_{i + 1}" for i in range(num_bands)]
+        band_names = [f"Band_{i + 1}" for i in range(num_bands)]
 
     stats = {}
 

@@ -1,3 +1,5 @@
+"""Visualization functions for plotting histograms, statistics, and scatter plots."""
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns

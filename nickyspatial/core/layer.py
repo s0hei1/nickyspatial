@@ -1,3 +1,12 @@
+"""Defines the Layer class and related functionality for organizing geospatial data.
+
+A layer can represent a conceptual container for a vector object which is tightly coupled with underlying raster data, allowing
+additional metadata or processing logic to be attached making sure heirarchical relationships are maintained.
+This module provides the Layer and LayerManager classes, which manage layers of geospatial data, including segmentation results,
+classifications,and filters. Layers can be created, copied, and manipulated, and they support attaching functions to calculate
+additional properties.
+"""
+
 import uuid
 
 import pandas as pd

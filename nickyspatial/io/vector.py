@@ -1,3 +1,8 @@
+"""Manages vector data I/O, supporting formats like Shapefile and GeoJSON.
+
+This module typically offers utilities for handling attributes, geometries, and coordinate reference systems.
+"""
+
 import os
 
 import geopandas as gpd

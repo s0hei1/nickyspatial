@@ -1,3 +1,14 @@
+"""Provides a rule engine for object-based analysis, where segments or layers are processed according to custom logic.
+
+Main idea here is to allow encode expert rules that can be applied to object segments which are layers in a nickyspatial context.
+So rules are tied up to the layers , they can be attached or revoked or executed multiple items
+
+Developers can define domain-specific rules to classify or merge features based on attributes.
+This module includes the Rule and RuleSet classes, which allow users to create, manage, and apply rules to layers.
+The RuleSet class can be used to group multiple rules together, and the execute method applies these rules to a given layer.
+The rules can be defined using string expressions that can be evaluated using the numexpr library for performance.
+"""
+
 import numexpr as ne
 import pandas as pd
 
@@ -25,6 +36,7 @@ class Rule:
         self.class_value = class_value if class_value is not None else name
 
     def __str__(self):
+        """String representation of the rule."""
         return f"Rule '{self.name}': {self.condition} -> {self.class_value}"
 
 
@@ -44,6 +56,7 @@ class RuleSet:
 
     @staticmethod
     def wrap_condition_parts_simple(self, condition):
+        """Wrap condition parts with parentheses for evaluation."""
         parts = condition.split("&")
         parts = [f"({part.strip()})" for part in parts]
         return " & ".join(parts)

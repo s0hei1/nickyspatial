@@ -1,3 +1,11 @@
+"""Implements spatial operations like smoothing and morphological transformations.
+
+These filters can modify the geometry or arrangement of pixel values to enhance or simplify data for object analysis.
+The functions here include smoothing boundaries, merging small segments, and selecting segments based on area.
+These operations are essential for preparing data for object-based image analysis, especially in remote sensing applications.
+The functions are designed to work with raster data and can be applied to layers created from segmentation algorithms.
+"""
+
 import geopandas as gpd
 import numpy as np
 

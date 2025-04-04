@@ -1,3 +1,5 @@
+"""Spatial statistics for layers in NickySpatial."""
+
 import numpy as np
 
 

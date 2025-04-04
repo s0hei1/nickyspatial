@@ -1,3 +1,11 @@
+"""Test suite for the NickySpatial application.
+
+This suite tests the full workflow of the NickySpatial library, including
+reading a raster, performing segmentation, calculating spectral indices,
+applying classification rules, and exporting results.
+It also includes checks for the generated outputs and their validity.
+"""
+
 import json
 import os
 import shutil
@@ -21,6 +29,7 @@ from nickyspatial import (
 
 @pytest.fixture(autouse=True)
 def clean_output():
+    """Fixture to clean up the output directory before and after tests."""
     output_dir = "output"
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
@@ -31,6 +40,7 @@ def clean_output():
 
 @pytest.fixture
 def test_raster_path():
+    """Fixture to provide the path to a sample raster image for testing."""
     path = os.path.join("data", "sample.tif")
     if not os.path.exists(path):
         pytest.skip("Test image not found in data/ directory.")
@@ -38,6 +48,7 @@ def test_raster_path():
 
 
 def check_geojson_features(filepath):
+    """Check if the GeoJSON file contains features."""
     with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert data.get("type") == "FeatureCollection", "Invalid GeoJSON: wrong type."
@@ -47,6 +58,7 @@ def check_geojson_features(filepath):
 
 
 def test_full_workflow(test_raster_path):
+    """Test the full workflow of segmentation, classification, and export."""
     # Step 1: Create the output directory and initialize the LayerManager.
     output_dir = "output"
     os.makedirs(output_dir, exist_ok=True)
