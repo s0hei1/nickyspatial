@@ -2,7 +2,6 @@
 
 An open-source object-based image analysis library for remote sensing. 
 
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Build System**      | [![uv](https://img.shields.io/badge/build-uv-blue?logo=uv&logoColor=white)](https://pypi.org/project/uv/) [![hatchling](https://img.shields.io/badge/build-hatchling-blue?logo=hatchling&logoColor=white)](https://github.com/pypa/hatchling) |
 | **Linter & Formatter**| [![Ruff](https://img.shields.io/badge/ruff-v0.0.0-blue?logo=ruff&logoColor=white)](https://beta.ruff.rs/) via [![pre-commit](https://img.shields.io/badge/pre--commit-active-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com) |
 | **Documentation**     | Built with [![MkDocs](https://img.shields.io/badge/MkDocs-Documentation-blue?logo=mkdocs&logoColor=white)](https://www.mkdocs.org/) – [View Docs](https://kshitijrajsharma.github.io/nickyspatial/) |
