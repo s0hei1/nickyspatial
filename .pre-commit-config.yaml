@@ -4,7 +4,7 @@ repos:
     rev: 0.6.12
     hooks:
       - id: uv-lock
-      
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
     rev: v0.11.3
@@ -14,3 +14,9 @@ repos:
         args: [ --fix ]
       # Run the formatter.
       - id: ruff-format
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v1.17.0  
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
