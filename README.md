@@ -70,11 +70,7 @@ TODO : Add example scripts here
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+Contributions are welcome! Follow [dev setup guide](./docs/dev.md) & Please feel free to submit a Pull Request.
 
 ## Acknowledgments
 
