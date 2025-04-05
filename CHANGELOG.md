@@ -1,3 +1,17 @@
+## v0.0.9 (2025-04-05)
+
+### Fix
+
+- **ui**: fixes ui , adds streamlit
+
+### Refactor
+
+- **ruff**: refact accordingly ruff formatting
+
+### Perf
+
+- **rules**: adds get ruleset method
+
 ## v0.0.8 (2025-04-05)
 
 ### Fix
