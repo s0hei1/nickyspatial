@@ -15,7 +15,7 @@ Key features:
 - Integration with geospatial data formats
 """
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 __author__ = "Kshitij Raj Sharma"
 
 from .core.layer import Layer, LayerManager
