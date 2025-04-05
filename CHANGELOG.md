@@ -1,3 +1,9 @@
+## v0.0.7 (2025-04-05)
+
+### Fix
+
+- **docs**: fixes documentation bug
+
 ## v0.0.6 (2025-04-05)
 
 ### Fix
