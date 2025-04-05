@@ -4,7 +4,7 @@ An open-source object-based image analysis library for remote sensing.
 
 | Category | Badge |
 |----------|-------|
-| **Build** | [![uv](https://img.shields.io/badge/build-uv-blue?logo=uv&logoColor=white)](https://pypi.org/project/uv/) [![hatchling](https://img.shields.io/badge/build-hatchling-blue?logo=hatchling&logoColor=white)](https://github.com/pypa/hatchling) |
+| **Build** | [![uv](https://img.shields.io/badge/build-uv-blue?logo=uv&logoColor=white)](https://pypi.org/project/uv/) [![hatchling](https://img.shields.io/badge/build-hatchling-blue?logo=hatchling&logoColor=white)](https://github.com/pypa/hatchling)  [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/kshitijrajsharma/nickyspatial/master.svg)](https://results.pre-commit.ci/latest/github/kshitijrajsharma/nickyspatial/master)  |
 | **Code Quality** | [![Ruff](https://img.shields.io/badge/ruff-v0.11.3-blue?logo=ruff&logoColor=white)](https://beta.ruff.rs/) [![pre-commit](https://img.shields.io/badge/pre--commit-active-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com) ![Tests](https://img.shields.io/badge/tests-passing-brightgreen) ![Coverage](https://img.shields.io/badge/Coverage-90%25-brightgreen) |
 | **Documentation** | [![MkDocs](https://img.shields.io/badge/MkDocs-Documentation-blue?logo=mkdocs&logoColor=white)](https://kshitijrajsharma.github.io/nickyspatial/) |
 | **Package Info** | ![Python](https://img.shields.io/badge/Python-3.10%2B-blue) [![PyPI version](https://img.shields.io/pypi/v/nickyspatial.svg)](https://pypi.org/project/nickyspatial) ![Dependencies](https://img.shields.io/librariesio/github/kshitijrajsharma/nickyspatial) ![License](https://img.shields.io/badge/License-MIT-yellow.svg) |
