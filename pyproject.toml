@@ -52,6 +52,9 @@ docs = [
     "mkdocs-material>=9.6.11",
     "mkdocstrings-python>=1.16.10",
 ]
+ui = [
+    "streamlit>=1.44.1",
+]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
