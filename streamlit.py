@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Streamlit Webapp
 
 Frontend for the demo of nickyspatial library
@@ -607,7 +608,7 @@ def render_rule_builder_tab():
                     condition_parts.append(condition_part)
 
                     if i < len(st.session_state.condition_builder) - 1:
-                        connector = st.selectbox(f"Connect with", options=["&", "|"], key=f"conn_{i}")
+                        connector = st.selectbox("Connect with", options=["&", "|"], key=f"conn_{i}")
                         st.session_state.condition_builder[i]["connector"] = connector
 
                 if condition_parts:
@@ -667,7 +668,7 @@ def render_layer_manager_tab():
             col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
 
             with col1:
-                if st.button(f"View Info", key=f"info_{layer_name}"):
+                if st.button("View Info", key=f"info_{layer_name}"):
                     layer = st.session_state.layers.get(layer_name)
                     with st.spinner("Loading layer information..."):
                         if layer and hasattr(layer, "objects"):
@@ -678,7 +679,7 @@ def render_layer_manager_tab():
                             st.write(", ".join(attribute_list))
 
             with col2:
-                if st.button(f"Visualize", key=f"vis_{layer_name}"):
+                if st.button("Visualize", key=f"vis_{layer_name}"):
                     layer = st.session_state.layers.get(layer_name)
                     with st.spinner("Generating visualization..."):
                         if layer:
@@ -697,7 +698,7 @@ def render_layer_manager_tab():
                                 st.pyplot(fig)
 
             with col3:
-                if st.button(f"Export Options", key=f"export_{layer_name}"):
+                if st.button("Export Options", key=f"export_{layer_name}"):
                     layer = st.session_state.layers.get(layer_name)
                     if layer:
                         st.session_state.export_layer = layer_name
@@ -802,10 +803,10 @@ def render_welcome_screen():
     """Render the welcome screen for the application."""
     st.write("""
     ## Welcome to the nickyspatial Interactive Web App
-    
+
     This application allows you to perform object-based image analysis on remote sensing data with complete flexibility
     to configure all parameters, rules, and layers.
-    
+
     To get started:
     1. Use the sidebar to upload your own raster data or use the sample data
     2. Configure segmentation parameters and create segments
@@ -813,7 +814,7 @@ def render_welcome_screen():
     4. Create rule sets and classification rules in the Rule Builder
     5. Apply your rules to classify the image
     6. Visualize and export your results
-    
+
     ### Features:
     - Fully configurable image segmentation parameters
     - Dynamic creation of custom rule sets and rules
@@ -830,11 +831,11 @@ def render_welcome_screen():
 def render_app_info():
     """Render the application information in the sidebar."""
     st.sidebar.markdown("---")
-    st.sidebar.info(f"""
+    st.sidebar.info("""
     **About nickyspatial**
-    
+
     An open-source object-based image analysis library for remote sensing.
-    
+
     [GitHub Repository](https://github.com/kshitijrajsharma/nickyspatial)
     """)
 
