@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Alrighty , let's get this visualization party started!
 
 No matter what you do you need to see it and present it , this is the module for it

@@ -19,11 +19,11 @@ Once UV is installed, install the project dependencies directly into your virtua
 
 ```bash
 uv sync
-``` 
+```
 
 This command reads project's configuration (i.e. `pyproject.toml`) and ensures that all required libraries are installed with the correct versions.
 
-## 3. Install Pre-commit Hooks 
+## 3. Install Pre-commit Hooks
 
 We use [pre-commit](https://pre-commit.com/) hooks to ensure code quality and consistency across the project. Our pre-commit configuration includes:
 
@@ -47,7 +47,7 @@ This will automatically run the following on every commit:
 
 Once you have UV installed, dependencies synced, and pre-commit hooks set, you’re ready for development. A typical workflow might look like:
 
-- Work on a **feature** or **bug fix**. Just tell other people what you will be working on in issues 
+- Work on a **feature** or **bug fix**. Just tell other people what you will be working on in issues
 - **Run your tests** – our project uses Pytest for testing.
 - **Commit your changes** – pre-commit hooks ensure that your code meets our quality standards and that your commit messages follow the Conventional Commits guidelines.
 - **Submit your PR** - Create a branch with suitable name as per as your changes and raise PR

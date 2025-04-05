@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Test suite for the NickySpatial application.
 
 This suite tests the full workflow of the NickySpatial library, including

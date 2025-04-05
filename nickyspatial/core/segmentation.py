@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Implements segmentation algorithms to partition images into meaningful region objects.
 
 The functions here might apply clustering or region-growing techniques, aiding object-based remote sensing analysis.

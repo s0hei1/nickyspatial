@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Functions to create maps and visualize layers."""
 
 import matplotlib.patches as mpatches

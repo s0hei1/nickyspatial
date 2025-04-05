@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Provides a rule engine for object-based analysis, where segments or layers are processed according to custom logic.
 
 Main idea here is to allow encode expert rules that can be applied to object segments which are layers in a nickyspatial context.
