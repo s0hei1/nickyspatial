@@ -1,18 +1,28 @@
 repos:
+  
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-toml
+      - id: check-yaml
+      - id: check-ast
+      - id: check-symlinks
+      - id: end-of-file-fixer
+      - id: file-contents-sorter
+      - id: trailing-whitespace
+      - id: detect-private-key
+      - id: fix-encoding-pragma
+  
   - repo: https://github.com/astral-sh/uv-pre-commit
-    # uv version.
     rev: 0.6.12
     hooks:
       - id: uv-lock
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version.
     rev: v0.11.3
     hooks:
-      # Run the linter.
       - id: ruff
-        args: [--fix]
-      # Run the formatter.
+        args: [--fix, --exit-non-zero-on-fix, --show-fixes]
       - id: ruff-format
 
   - repo: https://github.com/commitizen-tools/commitizen
@@ -20,3 +30,15 @@ repos:
     hooks:
       - id: commitizen
         stages: [commit-msg]
+
+ci:
+    autofix_commit_msg: |
+        [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+        for more information, see https://pre-commit.ci
+    autofix_prs: true
+    autoupdate_branch: ''
+    autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+    autoupdate_schedule: weekly
+    skip: []
+    submodules: true
