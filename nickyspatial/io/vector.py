@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Manages vector data I/O, supporting formats like Shapefile and GeoJSON.
 
 This module typically offers utilities for handling attributes, geometries, and coordinate reference systems.

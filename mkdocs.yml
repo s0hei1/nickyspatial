@@ -43,9 +43,9 @@ plugins:
   - git-revision-date-localized:
       enable_creation_date: true
 
-nav : 
+nav :
  - Home: index.md
- - Contribute: 
+ - Contribute:
     - Installation: dev.md
  - Examples:
     - Basic: examples/simple_usecase.ipynb

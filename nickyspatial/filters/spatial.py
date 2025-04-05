@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Implements spatial operations like smoothing and morphological transformations.
 
 These filters can modify the geometry or arrangement of pixel values to enhance or simplify data for object analysis.

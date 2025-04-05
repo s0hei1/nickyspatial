@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Spectral indices calculation module."""
 
 import numpy as np

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Helpers , Aren't they useful ?"""
 
 import json

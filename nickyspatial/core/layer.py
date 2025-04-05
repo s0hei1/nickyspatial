@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Defines the Layer class and related functionality for organizing geospatial data.
 
 A layer can represent a conceptual container for a vector object which is tightly coupled with underlying raster data, allowing

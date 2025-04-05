@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Performs spectral-based manipulations of imagery, including band arithmetic and transformations.
 
 It supports generating new spectral bands or combinations to highlight specific features.

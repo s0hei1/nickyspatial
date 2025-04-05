@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Testing Working Document!
 
 Just a workspace document to test the functionality of the library.
