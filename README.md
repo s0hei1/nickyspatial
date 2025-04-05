@@ -1,6 +1,6 @@
 # NickySpatial
 
-An open-source object-based image analysis library for remote sensing. 
+An open-source object-based image analysis library for remote sensing.
 
 | Category | Badge |
 |----------|-------|
@@ -17,7 +17,7 @@ An open-source object-based image analysis library for remote sensing.
 
 NickySpatial is a Python package that provides object-based image analysis (OBIA) functionality similar to commercial software like eCognition. It allows users to segment geospatial imagery into meaningful objects, calculate statistics, and apply rule-based classification.
 
-## Project Structure 
+## Project Structure
 
 ```graphql
 nickyspatial/
@@ -59,7 +59,7 @@ pip install nickyspatial
 
 ```python
 import nickyspatial as ns
- TODO : add sample computation here 
+ TODO : add sample computation here
 
 ```
 
@@ -70,9 +70,8 @@ For detailed documentation and examples, see the [documentation website](#).
 ## Examples
 
 Check out the [examples](./docs/examples/) directory for more examples:
- 
 
-TODO : Add example scripts here 
+TODO : Add example scripts here
 
 ## Contributing
 
@@ -84,6 +83,6 @@ Contributions are welcome! Follow [dev setup guide](./docs/dev.md) & Please feel
 - Built on top of powerful open-source libraries like numpy, rasterio, scikit-image, and GeoPandas
 
 ### Nicky
-**Nicky** is my belated dog and I named this package on his memory ! 
+**Nicky** is my belated dog and I named this package on his memory !
 
 ![image](https://github.com/user-attachments/assets/b5b86c63-ae5a-48b4-9d45-3bb34a58a102)
