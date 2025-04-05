@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Handles raster input and output operations, including reading and saving multi-band images.
 
 Functions in this module may also provide metadata parsing and coordinate transform tools.
@@ -107,8 +108,15 @@ def layer_to_raster(layer, output_path, column=None, nodata=0):
             raise ValueError(f"Column '{column}' not found in layer objects")
 
         objects = layer.objects
-        shapes = [(geom, value) for geom, value in zip(objects.geometry, objects[column], strict=False)]
-
+        col_values = objects[column]
+        # Check if values are numeric
+        if np.issubdtype(col_values.dtype, np.number):
+            shapes = [(geom, float(val)) for geom, val in zip(objects.geometry, col_values, strict=False)]
+        else:
+            unique_vals = col_values.unique()
+            val_map = {val: idx for idx, val in enumerate(unique_vals)}
+            print(f"Mapping categorical values: {val_map}")
+            shapes = [(geom, val_map[val]) for geom, val in zip(objects.geometry, col_values, strict=False)]
         if layer.raster is not None:
             if len(layer.raster.shape) == 3:
                 height, width = layer.raster.shape[1], layer.raster.shape[2]
