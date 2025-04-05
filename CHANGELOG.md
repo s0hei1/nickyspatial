@@ -1,3 +1,9 @@
+## v0.0.5 (2025-04-05)
+
+### Fix
+
+- **documentation**: fixes broken link in example
+
 ## v0.0.4 (2025-04-05)
 
 ### Fix
