@@ -83,6 +83,16 @@ class RuleSet:
         self.rules.append(rule)
         return rule
 
+    def get_rules(self):
+        """Get the list of rules in the rule set.
+
+        Returns:
+        --------
+        list of tuples
+            List of (name, condition) tuples for each rule
+        """
+        return [(rule.name, rule.condition) for rule in self.rules]
+
     def execute(
         self,
         source_layer,
