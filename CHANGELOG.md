@@ -1,3 +1,9 @@
+## v0.0.8 (2025-04-05)
+
+### Fix
+
+- **raster**: fixes bug when category is string and map it to int in rasterio
+
 ## v0.0.7 (2025-04-05)
 
 ### Fix
