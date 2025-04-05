@@ -2,10 +2,6 @@
 
 The functions here might apply clustering or region-growing techniques, aiding object-based remote sensing analysis.
 This module includes the MultiResolutionSegmentation class, which implements a bottom-up region-growing algorithm
-for segmenting images based on pixel homogeneity and shape compactness.
-The segmentation process is designed to optimize the homogeneity of pixel values within segments.
-The class provides methods to execute the segmentation algorithm on image data and create a layer with the results.
-It also includes methods to create vector objects from segments and calculate statistics for segments based on image data.
 """
 
 import warnings
@@ -20,7 +16,7 @@ from .layer import Layer
 
 
 class MultiResolutionSegmentation:
-    """Implementation of ChessBoard segmentation algorithm for remote sensing imagery.
+    """Implementation of Multiresolution segmentation algorithm.
 
     This algorithm segments an image using a bottom-up region-growing approach
     that optimizes the homogeneity of pixel values within segments while
@@ -89,7 +85,7 @@ class MultiResolutionSegmentation:
             segments = segmentation.slic(
                 multichannel_image,
                 n_segments=n_segments,
-                compactness=self.compactness * 20,
+                compactness=self.compactness,
                 sigma=1.0,
                 start_label=1,
                 channel_axis=-1,
