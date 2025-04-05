@@ -1,3 +1,10 @@
+## v0.0.6 (2025-04-05)
+
+### Fix
+
+- **ci**: precommit
+- **ci**: adds precommitci and fixes to publish
+
 ## v0.0.5 (2025-04-05)
 
 ### Fix
