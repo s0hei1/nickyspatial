@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Streamlit Webapp
+"""Streamlit Webapp.
 
 Frontend for the demo of nickyspatial library
 """
@@ -99,7 +99,7 @@ def get_layer_attributes(layer_name):
 def update_available_attributes():
     """Update the available attributes based on the current layers."""
     attributes = set()
-    for layer_name, layer in st.session_state.layers.items():
+    for _layer_name, layer in st.session_state.layers.items():
         if layer and hasattr(layer, "objects") and hasattr(layer.objects, "columns"):
             for col in layer.objects.columns:
                 if col not in ["geometry"]:
@@ -505,7 +505,7 @@ def render_classification_tab():
 
         if st.button("Load Vegetation Classification Example"):
             has_ndvi = False
-            for layer_name, layer in st.session_state.layers.items():
+            for _layer_name, layer in st.session_state.layers.items():
                 if "NDVI" in layer.objects.columns:
                     has_ndvi = True
                     break
@@ -583,7 +583,7 @@ def render_rule_builder_tab():
 
                 condition_parts = []
 
-                for i, condition in enumerate(st.session_state.condition_builder):
+                for i, _condition in enumerate(st.session_state.condition_builder):
                     st.subheader(f"Condition Component {i + 1}")
                     col1, col2, col3 = st.columns(3)
 
@@ -858,11 +858,11 @@ def main():
             temp_file = os.path.join(st.session_state.output_dir, "uploaded_file.tif")
             with open(temp_file, "wb") as f:
                 f.write(uploaded_file.getbuffer())
-            load_success = load_raster(temp_file)
+            _load_success = load_raster(temp_file)
     else:
         sample_data_path = st.sidebar.text_input("Path to sample data:", "data/sample.tif")
         if st.sidebar.button("Load Sample Data"):
-            load_success = load_raster(sample_data_path)
+            _load_success = load_raster(sample_data_path)
 
     if st.session_state.image_data is not None:
         st.sidebar.success("Image loaded successfully")
