@@ -20,8 +20,9 @@ __version__ = "0.0.9"
 __author__ = "Kshitij Raj Sharma"
 
 from .core.layer import Layer, LayerManager
-from .core.rules import Rule, RuleSet
+from .core.rules import Rule, RuleSet, MergeRuleSet, EnclosedByRuleSet, TouchedByRuleSet
 from .core.segmentation import MultiResolutionSegmentation
+from .core.supervised_classification import SupervisedClassification
 
 from .filters.spatial import merge_small_segments, select_by_area, smooth_boundaries
 from .filters.spectral import enhance_contrast, spectral_filter
