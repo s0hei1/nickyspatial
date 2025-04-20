@@ -34,7 +34,8 @@ from nickyspatial import (
     plot_classification,
     plot_layer,
     read_raster,
-    SupervisedClassification
+    SupervisedClassification,
+    MergeRuleSet
 )
 
 st.set_page_config(page_title="nickyspatial - Remote Sensing Analysis", page_icon="🛰️", layout="wide")
@@ -72,9 +73,14 @@ def initialize_session_state():
         st.session_state.classes = {}
     if "active_segmentation_layer_name" not in st.session_state:
         st.session_state.active_segmentation_layer_name = {}
-    if "classification_fig" not in st.session_state:
+    if "classification_fig" not in st.session_state: #TODO: Handle is dynamically
         st.session_state.classification_fig=None
-
+    if "merged_fig" not in st.session_state:
+        st.session_state.merged_fig=None
+    if "processes" not in st.session_state:
+        st.session_state.processes = []
+    if "delete_index" not in st.session_state:
+        st.session_state.delete_index = None
 
 def load_raster(file_path):
     """Load raster data and initialize session state variables."""
@@ -151,7 +157,7 @@ def perform_segmentation(image_data, transform, crs, scale_param, compactness_pa
 def perform_supervised_classification(layer, selected_classifier, classifier_params, classification_name):
     """Perform segmentation on the image data."""
     try:
-        with st.spinner("Performing segmentation..."):
+        with st.spinner("Performing supervised classification..."):
             samples={}
             for key in list(st.session_state.classes.keys()):
                 samples[key]=st.session_state.classes[key]["sample_ids"]
@@ -171,9 +177,27 @@ def perform_supervised_classification(layer, selected_classifier, classifier_par
             update_available_attributes()
             return classification_layer
     except Exception as e:
-        st.error(f"Error during segmentation: {str(e)}")
+        st.error(f"Error during supervised classification: {str(e)}")
         return None
 
+def perform_merge_region(layer, class_column_name, class_value, layer_name):
+    """Perform segmentation on the image data."""
+    try:
+        with st.spinner("Performing merge regions..."):
+            merger = MergeRuleSet("MergeByVegAndType")
+            merged_layer = merger.execute(
+                source_layer=layer, 
+                class_column_name=class_column_name,
+                class_value=class_value,
+                layer_manager=st.session_state.manager,
+                layer_name=layer_name)
+                    
+            st.session_state.layers[layer_name] = merged_layer
+            update_available_attributes()
+            return merged_layer
+    except Exception as e:
+        st.error(f"Error during merged_layer: {str(e)}")
+        return None
                     
 def calculate_ndvi(layer, nir_column, red_column, output_column="NDVI"):
     """Calculate NDVI for the specified layer."""
@@ -494,6 +518,44 @@ def render_segmentation_tab():
                 if features_calculated:
                     st.success("All selected features calculated successfully!")
 
+def render_merge_regions(index):
+    
+    input_layer = st.selectbox("Select input layer:", options=list(st.session_state.layers.keys()))
+    layer_name = st.text_input("Layer Name", "Merged Regions")
+
+    layer = st.session_state.layers[input_layer]
+    layer_objects=layer.objects
+    
+    #TODO: when base_segmentation is selected, there is column "classification" available, which should not be
+    col1, col2 = st.columns(2)
+    i=1
+    with col1:
+        attr_option_list=list(layer_objects.columns)
+        class_column_name = st.selectbox(
+            f"Attribute {i + 1}", options=attr_option_list, key=f"attr_{i}"
+        )
+
+        value_option_list=(layer_objects[class_column_name]).unique().tolist()
+        value_option_list.insert(0, 'All')
+
+    with col2:
+        class_value = st.multiselect(
+            "Attribute", options=value_option_list, key="attr", default=["All"]
+        )
+        if "All" in class_value:
+            class_value = [item for item in value_option_list if item != "All"]
+        # st.write(class_value)
+    execute_button = st.button("Execute")
+    if execute_button:
+        merged_layer= perform_merge_region(layer, class_column_name, class_value, layer_name)
+        if merged_layer:
+                fig = plot_classification(merged_layer, class_field="classification")
+                st.session_state.merged_fig = fig  # Store the figure in session state
+
+    if "merged_fig" in st.session_state:
+        st.pyplot(st.session_state.merged_fig)
+
+
 
 def render_classification_tab():
     """Render the classification tab for applying rule sets to segmentation layers."""
@@ -736,7 +798,7 @@ def render_classification_tab():
                                 value=42,
                                 step=1
                             )
-                    apply_button = st.button("Run Classification")
+                    apply_button = st.button("Execute")
 
                     if apply_button:
                         classifier_params={"n_estimators":n_estimators, "oob_score":bool(oob_score), "random_state":random_state}
@@ -760,8 +822,44 @@ def render_classification_tab():
                     
             # 4. RULE-BASED REFINEMENT
             elif classification_step == "Rule-Based Refinement":
-                st.markdown("### 📏 Rule-Based Refinement")
+                add_process_button = st.button("➕ Add process")
+                if add_process_button:
+                    st.session_state.processes.append({
+                        "id": len(st.session_state.processes),
+                        "type": ''  # Default process type
+                    })
+                OPERATION_LIST=['','Assign Class', 'Merge Region']
 
+                for i, process in enumerate(st.session_state.processes):
+                    with st.expander(f"Process {i+1}: {process['type']}"):
+                        selected_operation = st.selectbox(
+                            "Select  Operation",
+                            OPERATION_LIST,
+                            index=0,
+                            key=f"operation_{i}"
+                        )
+                        st.session_state.processes[i]["type"] = selected_operation
+
+                        if selected_operation == "Merge Region":
+
+                            render_merge_regions(i)
+
+                        elif selected_operation == "Assign Class":
+                            st.selectbox("Clip layer", ["Layer A", "Layer B"], key=f"clip_layer_{i}")
+                
+                    cola,colb=st.columns([1,12])
+                    with cola:
+                        if st.button("Save", key=f"save_{i}"):
+                            pass
+                    with colb:
+                        if st.button("🗑️ Delete", key=f"delete_{i}"):
+                            st.session_state.delete_index = i
+                            st.rerun()
+
+                if st.session_state.delete_index is not None:
+                    del st.session_state.processes[st.session_state.delete_index]
+                    st.session_state.delete_index = None
+                    st.rerun()
 
 def render_rule_builder_tab():
     """Render the rule builder tab for creating and managing classification rule sets."""
