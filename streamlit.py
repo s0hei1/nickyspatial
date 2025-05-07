@@ -1048,7 +1048,18 @@ def render_select_samples(index):
                 else:
                     st.error("Please enter a class name.")
 
-            selected_class = st.radio("🎯 Select Class", list(st.session_state.classes.keys()), key="class_radio") if st.session_state.classes else None
+            selected_class = st.radio("Select Class", list(st.session_state.classes.keys()), key="class_radio")
+
+            st.markdown("##### Classes")
+            for class_name, class_info in st.session_state.classes.items():
+                color = class_info["color"]
+                st.markdown(
+                    f"<div style='display:inline-flex;align-items:center;margin-bottom:4px;'>"
+                    f"<div style='width:15px;height:15px;background:{color};border:1px solid black;margin-right:8px;'></div>"
+                    f"{class_name}"
+                    f"</div>", unsafe_allow_html=True
+                )
+            # selected_class = st.radio("Select Class", list(st.session_state.classes.keys()), key="class_radio") if st.session_state.classes else None
         with col2:
             st.markdown("### Click Segments on Interactive Map")
 
