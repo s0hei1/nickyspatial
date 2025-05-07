@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """Functions to create maps and visualize layers."""
 
+import random
+
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import ListedColormap
-import random
 
 
 def plot_layer(
@@ -146,13 +147,13 @@ def plot_classification(layer, class_field="classification", figsize=(12, 10), l
             # assign new color (from tab20 or random if exceeds)
             if idx < len(base_colors):
                 rgb = base_colors[idx][:3]
-                color_hex = "#{:02x}{:02x}{:02x}".format(int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
+                color_hex = "#{:02x}{:02x}{:02x}".format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
             else:
                 color_hex = "#{:06x}".format(random.randint(0, 0xFFFFFF))
             classes[class_value] = {"color": color_hex, "sample_ids": []}
 
         # convert hex → RGB tuple for ListedColormap
-        rgb_tuple = tuple(int(color_hex[i:i+2], 16)/255 for i in (1,3,5))
+        rgb_tuple = tuple(int(color_hex[i : i + 2], 16) / 255 for i in (1, 3, 5))
         colors_list.append(rgb_tuple)
 
     # create colormap
@@ -172,10 +173,7 @@ def plot_classification(layer, class_field="classification", figsize=(12, 10), l
     )
 
     if legend and len(class_values) > 0:
-        patches = [
-            mpatches.Patch(color=classes[value]["color"], label=value)
-            for value in class_values
-        ]
+        patches = [mpatches.Patch(color=classes[value]["color"], label=value) for value in class_values]
         ax.legend(handles=patches, loc="upper right", title=class_field)
 
     ax.set_title(f"Classification by {class_field}")
@@ -187,7 +185,6 @@ def plot_classification(layer, class_field="classification", figsize=(12, 10), l
         layer.objects = layer.objects.drop(columns=["_class_id"])
 
     return fig
-
 
 
 def plot_comparison(

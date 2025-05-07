@@ -12,12 +12,13 @@ The rules can be defined using string expressions that can be evaluated using th
 
 import numexpr as ne
 import pandas as pd
-
-from .layer import Layer
 from shapely.geometry import shape
 from shapely.ops import unary_union
 
-#TODO: What if field have non-numeric content??
+from .layer import Layer
+
+
+# TODO: What if field have non-numeric content??
 class Rule:
     """A rule defines a condition to classify segments."""
 
@@ -188,14 +189,16 @@ class RuleSet:
             layer_manager.add_layer(result_layer)
 
         return result_layer
-    
-class CommonBase():
+
+
+class CommonBase:
     """A shared utility base class for spatial rule sets.
 
     This class provides common methods used by multiple rule sets
     to preprocess layer data and determine spatial relationships
     between segments.
     """
+
     @staticmethod
     def _preprocess_layer(layer, class_column_name):
         """Prepare geometry and class maps from a spatial layer.
@@ -214,10 +217,9 @@ class CommonBase():
         class_map : dict
             A dictionary mapping segment IDs to their respective class values.
         """
-
         df = layer.objects
-        geom_map = {sid: shape(geom) for sid, geom in zip(df['segment_id'], df['geometry'])}
-        class_map = dict(zip(df['segment_id'], df[class_column_name]))
+        geom_map = {sid: shape(geom) for sid, geom in zip(df["segment_id"], df["geometry"], strict=False)}
+        class_map = dict(zip(df["segment_id"], df[class_column_name], strict=False))
         return geom_map, class_map
 
     @staticmethod
@@ -243,6 +245,7 @@ class CommonBase():
                 neighbors.append(other_id)
         return neighbors
 
+
 class MergeRuleSet(CommonBase):
     """A rule set for merging segments of the same class based on specified class values."""
 
@@ -255,7 +258,6 @@ class MergeRuleSet(CommonBase):
             Name of the merge rule set
         """
         self.name = name if name else "MergeRuleSet"
-
 
     def execute(self, source_layer, class_column_name, class_value, layer_manager=None, layer_name=None):
         """Merge segments of the same class in a layer.
@@ -299,7 +301,7 @@ class MergeRuleSet(CommonBase):
         for class_value in class_values:
             visited = set()
 
-            for sid in df['segment_id'].unique():
+            for sid in df["segment_id"].unique():
                 if sid in visited or class_map[sid] != class_value:
                     continue
 
@@ -319,16 +321,12 @@ class MergeRuleSet(CommonBase):
                             queue.append(n_id)
 
                 merged_geom = unary_union(group_geom)
-                row_data = {
-                    'segment_id': min(group_ids),
-                    class_column_name: class_value,
-                    'geometry': merged_geom
-                }
+                row_data = {"segment_id": min(group_ids), class_column_name: class_value, "geometry": merged_geom}
 
                 new_rows.append(row_data)
                 to_drop.update(group_ids)
 
-        df = df[~df['segment_id'].isin(to_drop)]
+        df = df[~df["segment_id"].isin(to_drop)]
         df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
         result_layer.objects = df
 
@@ -360,8 +358,9 @@ class EnclosedByRuleSet(CommonBase):
         """
         self.name = name if name else "EnclosedByRuleSet"
 
-
-    def execute(self, source_layer, class_column_name, class_value_a, class_value_b, new_class_name,layer_manager=None, layer_name=None):
+    def execute(
+        self, source_layer, class_column_name, class_value_a, class_value_b, new_class_name, layer_manager=None, layer_name=None
+    ):
         """Apply enclosed-by logic to identify and reclassify segments.
 
         Parameters:
@@ -398,18 +397,15 @@ class EnclosedByRuleSet(CommonBase):
         surrounded_segments = []
         geom_map, class_map = self._preprocess_layer(source_layer, class_column_name)
 
-        for sid in df['segment_id'].unique():
+        for sid in df["segment_id"].unique():
             if class_map.get(sid) != class_value_a:
                 continue
-            
+
             neighbors = self._find_neighbors(sid, geom_map)
             if neighbors and all(class_map.get(n_id) == class_value_b for n_id in neighbors):
                 surrounded_segments.append(sid)
-            
-        df.loc[
-        (df['segment_id'].isin(surrounded_segments)) ,
-        class_column_name
-         ] = new_class_name
+
+        df.loc[(df["segment_id"].isin(surrounded_segments)), class_column_name] = new_class_name
 
         result_layer.objects = df
 
@@ -421,6 +417,7 @@ class EnclosedByRuleSet(CommonBase):
             layer_manager.add_layer(result_layer)
 
         return result_layer
+
 
 class TouchedByRuleSet(CommonBase):
     """A rule set to reclassify segments based on spatial enclosure.
@@ -439,10 +436,10 @@ class TouchedByRuleSet(CommonBase):
         """
         self.name = name if name else "TouchedByRuleSet"
 
-
-    def execute(self, source_layer, class_column_name, class_value_a, class_value_b, new_class_name,layer_manager=None, layer_name=None):
-        """
-        Executes the merge rule set by identifying and updating segments of a given class that are 
+    def execute(
+        self, source_layer, class_column_name, class_value_a, class_value_b, new_class_name, layer_manager=None, layer_name=None
+    ):
+        """Executes the merge rule set by identifying and updating segments of a given class that are
         adjacent to segments of another class.
 
         Parameters:
@@ -472,7 +469,6 @@ class TouchedByRuleSet(CommonBase):
         - If so, updates the segment's class to new_class_name.
         - Stores the modified DataFrame in the result layer and optionally registers it via the layer_manager.
         """
-
         if not layer_name:
             layer_name = f"{source_layer.name}_{self.name}"
 
@@ -485,18 +481,15 @@ class TouchedByRuleSet(CommonBase):
         touched_segments = []
         geom_map, class_map = self._preprocess_layer(source_layer, class_column_name)
 
-        for sid in df['segment_id'].unique():
+        for sid in df["segment_id"].unique():
             if class_map.get(sid) != class_value_a:
                 continue
-            
+
             neighbors = self._find_neighbors(sid, geom_map)
             if neighbors and any(class_map.get(n_id) == class_value_b for n_id in neighbors):
                 touched_segments.append(sid)
-            
-        df.loc[
-            (df['segment_id'].isin(touched_segments)) ,
-            class_column_name
-        ] = new_class_name
+
+        df.loc[(df["segment_id"].isin(touched_segments)), class_column_name] = new_class_name
 
         result_layer.objects = df
 
@@ -508,5 +501,3 @@ class TouchedByRuleSet(CommonBase):
             layer_manager.add_layer(result_layer)
 
         return result_layer
-    
-

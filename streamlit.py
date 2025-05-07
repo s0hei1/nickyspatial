@@ -7,25 +7,26 @@ Frontend for the demo of nickyspatial library
 import datetime
 import os
 import tempfile
-
-import pandas as pd
-import folium
-from streamlit_folium import st_folium
-import rasterio
-import numpy as np
-from PIL import Image
-from skimage.segmentation import mark_boundaries
-from pyproj import Transformer
 from tempfile import NamedTemporaryFile
+
+import folium
+import numpy as np
+import pandas as pd
+import rasterio
 from folium.raster_layers import ImageOverlay
+from PIL import Image
 from pyproj import Transformer
-import uuid
+from skimage.segmentation import mark_boundaries
+from streamlit_folium import st_folium
 
 import streamlit as st
 from nickyspatial import (
+    EnclosedByRuleSet,
     LayerManager,
+    MergeRuleSet,
     MultiResolutionSegmentation,
     RuleSet,
+    SupervisedClassification,
     attach_area_stats,
     attach_ndvi,
     attach_shape_metrics,
@@ -35,9 +36,6 @@ from nickyspatial import (
     plot_classification,
     plot_layer,
     read_raster,
-    SupervisedClassification,
-    MergeRuleSet,
-    EnclosedByRuleSet
 )
 
 st.set_page_config(page_title="nickyspatial - Remote Sensing Analysis", page_icon="🛰️", layout="wide")
@@ -78,11 +76,12 @@ def initialize_session_state():
     # if "classification_fig" not in st.session_state: #TODO: Handle is dynamically
     #     st.session_state.classification_fig=None
     if "merged_fig" not in st.session_state:
-        st.session_state.merged_fig=None
+        st.session_state.merged_fig = None
     if "processes" not in st.session_state:
         st.session_state.processes = []
     if "delete_index" not in st.session_state:
         st.session_state.delete_index = None
+
 
 def load_raster(file_path):
     """Load raster data and initialize session state variables."""
@@ -155,27 +154,27 @@ def perform_segmentation(image_data, transform, crs, scale_param, compactness_pa
     except Exception as e:
         st.error(f"Error during segmentation: {str(e)}")
         return None
-    
+
+
 def perform_supervised_classification(layer, selected_classifier, classifier_params, classification_name):
     """Perform segmentation on the image data."""
     try:
         with st.spinner("Performing supervised classification..."):
-            samples={}
+            samples = {}
             for key in list(st.session_state.classes.keys()):
-                samples[key]=st.session_state.classes[key]["sample_ids"]
-            
-            classifier=SupervisedClassification(
-                name="RF Classification", 
-                classifier_type=selected_classifier, 
-                classifier_params=classifier_params)
-            
-            classification_layer=classifier.execute(
+                samples[key] = st.session_state.classes[key]["sample_ids"]
+
+            classifier = SupervisedClassification(
+                name="RF Classification", classifier_type=selected_classifier, classifier_params=classifier_params
+            )
+
+            classification_layer = classifier.execute(
                 layer,
                 samples=samples,
                 layer_manager=st.session_state.manager,
-                layer_name=classification_name,)
-            
-                    
+                layer_name=classification_name,
+            )
+
             st.session_state.layers[classification_name] = classification_layer
             update_available_attributes()
             return classification_layer
@@ -183,18 +182,20 @@ def perform_supervised_classification(layer, selected_classifier, classifier_par
         st.error(f"Error during supervised classification: {str(e)}")
         return None
 
+
 def perform_merge_region(layer, class_column_name, class_value, layer_name):
     """Perform segmentation on the image data."""
     try:
         with st.spinner("Performing merge regions..."):
             merger = MergeRuleSet("MergeByVegAndType")
             merged_layer = merger.execute(
-                source_layer=layer, 
+                source_layer=layer,
                 class_column_name=class_column_name,
                 class_value=class_value,
                 layer_manager=st.session_state.manager,
-                layer_name=layer_name)
-                    
+                layer_name=layer_name,
+            )
+
             st.session_state.layers[layer_name] = merged_layer
             update_available_attributes()
             return merged_layer
@@ -202,19 +203,21 @@ def perform_merge_region(layer, class_column_name, class_value, layer_name):
         st.error(f"Error during merged_layer: {str(e)}")
         return None
 
-def perform_enclosed_by(layer, class_column_name, class_value_a,class_value_b,new_class_name, layer_name):
+
+def perform_enclosed_by(layer, class_column_name, class_value_a, class_value_b, new_class_name, layer_name):
     """Perform segmentation on the image data."""
     try:
         with st.spinner("Performing merge regions..."):
-            encloser=EnclosedByRuleSet()
-            enclosed_by_layer= encloser.execute(
+            encloser = EnclosedByRuleSet()
+            enclosed_by_layer = encloser.execute(
                 source_layer=layer,
                 class_column_name=class_column_name,
                 class_value_a=class_value_a,
                 class_value_b=class_value_b,
                 new_class_name=new_class_name,
                 layer_manager=st.session_state.manager,
-                layer_name=layer_name)
+                layer_name=layer_name,
+            )
             st.session_state.layers[layer_name] = enclosed_by_layer
             update_available_attributes()
             return enclosed_by_layer
@@ -222,7 +225,7 @@ def perform_enclosed_by(layer, class_column_name, class_value_a,class_value_b,ne
         st.error(f"Error during enclosed_by_layer: {str(e)}")
         return None
 
-                    
+
 def calculate_ndvi(layer, nir_column, red_column, output_column="NDVI"):
     """Calculate NDVI for the specified layer."""
     try:
@@ -334,6 +337,7 @@ def create_example_rule_sets():
         st.error(f"Error creating example rule sets: {str(e)}")
         return {}
 
+
 def render_segmentation(index):
     """Render the segmentation tab for image segmentation and feature calculation."""
     st.header("Image Segmentation")
@@ -361,11 +365,9 @@ def render_segmentation(index):
             step=0.1,
             help="Controls the compactness of segments. Higher values create more compact segments.",
         )
-        
 
     with col2:
         segmentation_name = st.text_input("Segmentation Layer Name", "Base_Segmentation")
-
 
     st.subheader("Configure Band Mappings")
     st.write("Set up mappings for spectral bands to use in indices and analysis")
@@ -414,7 +416,6 @@ def render_segmentation(index):
             )
             # process_data["params"]["segmentation_name"] = segmentation_name
 
-
     for key in st.session_state.band_mappings:
         if not st.session_state.band_mappings[key].endswith("_mean"):
             st.session_state.band_mappings[key] = f"{st.session_state.band_mappings[key]}_mean"
@@ -445,8 +446,6 @@ def render_segmentation(index):
     if "output_fig" in process_data:
         st.pyplot(process_data["output_fig"])
         # st.pyplot(fig)
-
-            
 
     # process_data["params"]["scale_param"] = scale_param
     # process_data["params"]["compactness_param"] = compactness_param
@@ -557,6 +556,7 @@ def render_segmentation(index):
     #             if features_calculated:
     #                 st.success("All selected features calculated successfully!")
 
+
 def render_calculate_features(index):
     try:
         st.subheader("Calculate Features")
@@ -665,6 +665,7 @@ def render_calculate_features(index):
                         st.success("All selected features calculated successfully!")
     except Exception as e:
         st.error(f"error: {str(e)}")
+
 
 # def render_segmentation_tab():
 #     """Render the segmentation tab for image segmentation and feature calculation."""
@@ -890,53 +891,54 @@ def render_merge_regions(index):
                 "Select input layer:",
                 options=list(st.session_state.layers.keys()),
                 key=f"input_layer_{index}",
-                index=list(st.session_state.layers.keys()).index(process_data["params"].get("input_layer", list(st.session_state.layers.keys())[0]))
+                index=list(st.session_state.layers.keys()).index(
+                    process_data["params"].get("input_layer", list(st.session_state.layers.keys())[0])
+                ),
             )
             process_data["params"]["input_layer"] = input_layer
             layer = st.session_state.layers[input_layer]
             layer_objects = layer.objects
-
 
             attr_option_list = list(layer_objects.columns)
             class_column_name = st.selectbox(
                 "Select Column",
                 options=attr_option_list,
                 key=f"attr_column_{index}",
-                index=attr_option_list.index(process_data["params"].get("class_column_name", attr_option_list[0]))
+                index=attr_option_list.index(process_data["params"].get("class_column_name", attr_option_list[0])),
             )
             process_data["params"]["class_column_name"] = class_column_name
 
             value_option_list = list(layer_objects[class_column_name].unique())
-            value_option_list.insert(0, 'All')
+            value_option_list.insert(0, "All")
 
         with col2:
-            layer_name = st.text_input("Layer Name", value=process_data["params"].get("layer_name", "Merged Regions"), key=f"layer_name_{index}")
+            layer_name = st.text_input(
+                "Layer Name", value=process_data["params"].get("layer_name", "Merged Regions"), key=f"layer_name_{index}"
+            )
             process_data["params"]["layer_name"] = layer_name
 
             # Ensure class_value is a list of valid options from value_option_list
-            default_values = process_data["params"].get("class_value", ['All'])
+            default_values = process_data["params"].get("class_value", ["All"])
             valid_default_values = [value for value in default_values if value in value_option_list]
             class_value = st.multiselect(
-                "Select Values",
-                options=value_option_list,
-                default=valid_default_values,
-                key=f"class_value_{index}"
+                "Select Values", options=value_option_list, default=valid_default_values, key=f"class_value_{index}"
             )
             if "All" in class_value:
                 class_value = [item for item in value_option_list if item != "All"]
 
             process_data["params"]["class_value"] = class_value
-        execute_button = st.button("Execute", key=f"execute_merge_{index}") # key=f"execute_merge_{index}
+        execute_button = st.button("Execute", key=f"execute_merge_{index}")  # key=f"execute_merge_{index}
         if execute_button:
             merged_layer = perform_merge_region(layer, class_column_name, class_value, layer_name)
             if merged_layer:
-                fig = plot_classification(merged_layer, class_field="classification",classes=st.session_state.classes)
+                fig = plot_classification(merged_layer, class_field="classification", classes=st.session_state.classes)
                 process_data["output_fig"] = fig
 
         if "output_fig" in process_data:
             st.pyplot(process_data["output_fig"])
     except Exception as e:
         st.error(f"Error: {str(e)}")
+
 
 def render_enclosed_by_class(index):
     try:
@@ -950,7 +952,9 @@ def render_enclosed_by_class(index):
                 "Select input layer:",
                 options=list(st.session_state.layers.keys()),
                 key=f"input_layer_{index}",
-                index=list(st.session_state.layers.keys()).index(process_data["params"].get("input_layer", list(st.session_state.layers.keys())[0]))
+                index=list(st.session_state.layers.keys()).index(
+                    process_data["params"].get("input_layer", list(st.session_state.layers.keys())[0])
+                ),
             )
             process_data["params"]["input_layer"] = input_layer
             layer = st.session_state.layers[input_layer]
@@ -961,10 +965,12 @@ def render_enclosed_by_class(index):
                 st.error("Layer is invalid")
                 st.stop()
         with col2:
-            layer_name = st.text_input("Layer Name", value=process_data["params"].get("layer_name", "Enclosed by"), key=f"layer_name_{index}")
+            layer_name = st.text_input(
+                "Layer Name", value=process_data["params"].get("layer_name", "Enclosed by"), key=f"layer_name_{index}"
+            )
             process_data["params"]["layer_name"] = layer_name
 
-        cola, colb,colc,cold = st.columns(4)
+        cola, colb, colc, cold = st.columns(4)
 
         with cola:
             # Ensure class_value is a list of valid options from value_option_list
@@ -972,47 +978,49 @@ def render_enclosed_by_class(index):
             if class_value_a in value_option_list:
                 class_value_index = value_option_list.index(class_value_a)
             else:
-                class_value_index = 0 
+                class_value_index = 0
 
             # valid_default_values = [value for value in default_values if value in value_option_list]
             class_value = st.selectbox(
-                "Select class",
-                options=value_option_list,
-                index=class_value_index,
-                key=f"class_value_{index}"
+                "Select class", options=value_option_list, index=class_value_index, key=f"class_value_{index}"
             )
             process_data["params"]["class_value"] = class_value
         with colb:
-
             class_value_b = process_data["params"].get("enclosing_class_value", 0)
             if class_value_b in value_option_list:
                 class_value_b_index = value_option_list.index(class_value_b)
             else:
-                class_value_b_index = 0 
+                class_value_b_index = 0
 
             enclosing_class_value = st.selectbox(
-                "Select enclosing class",
-                options=value_option_list,
-                index=class_value_b_index,
-                key=f"enclosing_class_value_{index}"
+                "Select enclosing class", options=value_option_list, index=class_value_b_index, key=f"enclosing_class_value_{index}"
             )
             process_data["params"]["enclosing_class_value"] = enclosing_class_value
         with colc:
-            new_class_name = st.text_input("New Class Name", value=process_data["params"].get("new_class_name", "new_class"), key=f"new_class_{index}")
-            
+            new_class_name = st.text_input(
+                "New Class Name", value=process_data["params"].get("new_class_name", "new_class"), key=f"new_class_{index}"
+            )
+
             process_data["params"]["new_class_name"] = new_class_name
         with cold:
-
             st.markdown("<div style='font-size: 14px;  margin-bottom: 4px;'>Color</div>", unsafe_allow_html=True)
-                
-            new_class_color_1 = st.color_picker("choose color", "#000000", label_visibility="collapsed", key=f"new_class_color_{index}")
-            
-        st.session_state.classes[new_class_name] = {"color":new_class_color_1,"sample_ids":[]}
 
+            new_class_color_1 = st.color_picker(
+                "choose color", "#000000", label_visibility="collapsed", key=f"new_class_color_{index}"
+            )
 
-        execute_button = st.button("Execute",key=f"execute_enclosed_by_{index}") # key=f"execute_enclosed_by_{index}"
+        st.session_state.classes[new_class_name] = {"color": new_class_color_1, "sample_ids": []}
+
+        execute_button = st.button("Execute", key=f"execute_enclosed_by_{index}")  # key=f"execute_enclosed_by_{index}"
         if execute_button:
-            enclosed_by_layer = perform_enclosed_by(layer, class_column_name="classification", class_value_a=class_value, class_value_b=enclosing_class_value,new_class_name=new_class_name, layer_name=layer_name)
+            enclosed_by_layer = perform_enclosed_by(
+                layer,
+                class_column_name="classification",
+                class_value_a=class_value,
+                class_value_b=enclosing_class_value,
+                new_class_name=new_class_name,
+                layer_name=layer_name,
+            )
             if enclosed_by_layer:
                 fig = plot_classification(enclosed_by_layer, class_field="classification", classes=st.session_state.classes)
                 process_data["output_fig"] = fig
@@ -1021,6 +1029,7 @@ def render_enclosed_by_class(index):
             st.pyplot(process_data["output_fig"])
     except Exception as e:
         st.error(f"Error: {str(e)}")
+
 
 def render_select_samples(index):
     try:
@@ -1034,17 +1043,17 @@ def render_select_samples(index):
 
             with col2a:
                 new_class = st.text_input("Class Name", key=f"new_class_input_{index}")
-                
 
             with col2b:
                 st.markdown("<div style='font-size: 14px;  margin-bottom: 4px;'>Color</div>", unsafe_allow_html=True)
-                
-                new_class_color = st.color_picker("choose color", "#000000", label_visibility="collapsed", key=f"new_class_color_{index}")
-            
 
-            if st.button("Add Class",key=f"add_class_{index}"):
+                new_class_color = st.color_picker(
+                    "choose color", "#000000", label_visibility="collapsed", key=f"new_class_color_{index}"
+                )
+
+            if st.button("Add Class", key=f"add_class_{index}"):
                 if new_class and new_class not in st.session_state.classes:
-                    st.session_state.classes[new_class] = {"color":new_class_color,"sample_ids":[]}
+                    st.session_state.classes[new_class] = {"color": new_class_color, "sample_ids": []}
                     st.success(f"Class '{new_class}' added!")
                 elif new_class in st.session_state.classes:
                     st.warning("Class already exists.")
@@ -1060,16 +1069,19 @@ def render_select_samples(index):
                     f"<div style='display:inline-flex;align-items:center;margin-bottom:4px;'>"
                     f"<div style='width:15px;height:15px;background:{color};border:1px solid black;margin-right:8px;'></div>"
                     f"{class_name}"
-                    f"</div>", unsafe_allow_html=True
+                    f"</div>",
+                    unsafe_allow_html=True,
                 )
             # selected_class = st.radio("Select Class", list(st.session_state.classes.keys()), key="class_radio") if st.session_state.classes else None
         with col2:
             st.markdown("### Click Segments on Interactive Map")
 
             # Select the input layer
-            
-            input_layer = st.selectbox("Select input layer:", options=list(st.session_state.layers.keys()),key=f"select_box_{index}")
-            st.session_state.active_segmentation_layer_name=input_layer
+
+            input_layer = st.selectbox(
+                "Select input layer:", options=list(st.session_state.layers.keys()), key=f"select_box_{index}"
+            )
+            st.session_state.active_segmentation_layer_name = input_layer
             layer = st.session_state.layers[input_layer]
             segments = layer.raster
             transform = layer.transform
@@ -1077,7 +1089,6 @@ def render_select_samples(index):
 
             image_data = st.session_state.image_data
             rgb_bands = (3, 2, 1)  # Adjust as needed
-
 
             # Create RGB base image (grayscale fallback)
             if image_data.shape[0] >= 3:
@@ -1094,7 +1105,6 @@ def render_select_samples(index):
                 gray = image_data[0]
                 gray_norm = (gray - gray.min()) / (gray.max() - gray.min() + 1e-10)
                 base_img = np.stack([gray_norm] * 3, axis=2)
-            
 
             # Assign colors to labeled segments
             segment_colored_img = (base_img * 255).astype(np.uint8).copy()
@@ -1103,17 +1113,16 @@ def render_select_samples(index):
             for class_name, class_data in st.session_state.classes.items():
                 color = class_data["color"]
                 if color.startswith("#"):
-                    color_rgb = [int(color[i:i+2], 16) for i in (1, 3, 5)]
+                    color_rgb = [int(color[i : i + 2], 16) for i in (1, 3, 5)]
                 else:
                     color_rgb = color  # Assume it's already an RGB triplet
                 for seg_id in class_data["sample_ids"]:
                     mask = segments == seg_id
                     for c in range(3):  # RGB channels
                         segment_colored_img[:, :, c][mask] = color_rgb[c]
-            
 
             # Overlay segment boundaries
-            overlay = mark_boundaries(segment_colored_img/255, segments, color=(1, 1, 0), mode="thick")
+            overlay = mark_boundaries(segment_colored_img / 255, segments, color=(1, 1, 0), mode="thick")
             overlay_uint8 = (overlay * 255).astype(np.uint8)
 
             # Save overlay to a temporary file
@@ -1127,28 +1136,22 @@ def render_select_samples(index):
             transformer = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
             top_left_latlon = transformer.transform(*top_left_utm)
             bottom_right_latlon = transformer.transform(*bottom_right_utm)
-            bounds = [[bottom_right_latlon[1], bottom_right_latlon[0]],
-                    [top_left_latlon[1], top_left_latlon[0]]]
+            bounds = [[bottom_right_latlon[1], bottom_right_latlon[0]], [top_left_latlon[1], top_left_latlon[0]]]
 
             # Create the map
             center_lat = (top_left_latlon[1] + bottom_right_latlon[1]) / 2
             center_lon = (top_left_latlon[0] + bottom_right_latlon[0]) / 2
             fmap = folium.Map(location=[center_lat, center_lon], zoom_start=15)
             ImageOverlay(
-                name="Colored Segments",
-                image=tmp_path,
-                bounds=bounds,
-                opacity=0.8,
-                interactive=True,
-                cross_origin=False
+                name="Colored Segments", image=tmp_path, bounds=bounds, opacity=0.8, interactive=True, cross_origin=False
             ).add_to(fmap)
             folium.LayerControl().add_to(fmap)
             st.write(f"Index used for selcndmnecnkntbox: {index}")
 
             # Display the map and handle click events
-            click_info = st_folium(fmap, height=600, width=700,key=f"map_folium_{index}")
+            click_info = st_folium(fmap, height=600, width=700, key=f"map_folium_{index}")
             st.write(f"Index used for selcndmnecnkntbox: {index}")
-            
+
             # Process click events
             if click_info and click_info.get("last_clicked"):
                 lat = click_info["last_clicked"]["lat"]
@@ -1174,6 +1177,7 @@ def render_select_samples(index):
     except Exception as e:
         st.error(f"error: {str(e)}")
 
+
 def render_supervised_classification(index):
     try:
         process_data = st.session_state.processes[index]
@@ -1185,50 +1189,36 @@ def render_supervised_classification(index):
         if "classes" in st.session_state and st.session_state.classes:
             col1, col2 = st.columns(2)
             with col1:
-                classifier_list=["Random Forest"]
-                selected_classifier = st.selectbox("Choose a classifier",
-                options=classifier_list,
-                index=0,
-                key=f"select_classifier_{index}")
+                classifier_list = ["Random Forest"]
+                selected_classifier = st.selectbox(
+                    "Choose a classifier", options=classifier_list, index=0, key=f"select_classifier_{index}"
+                )
             with col2:
-                classification_name = st.text_input("Layer Name", "Supervised_Classification",key=f"classification_name_{index}")
-            col1a, col1b,col1c= st.columns(3)
-            if selected_classifier=="Random Forest":
+                classification_name = st.text_input("Layer Name", "Supervised_Classification", key=f"classification_name_{index}")
+            col1a, col1b, col1c = st.columns(3)
+            if selected_classifier == "Random Forest":
                 with col1a:
                     n_estimators = st.number_input(
-                        "Number of Trees",
-                        min_value=10,
-                        max_value=1000,
-                        value=100,
-                        step=10,
-                        key=f"no_of_trees_{index}"
+                        "Number of Trees", min_value=10, max_value=1000, value=100, step=10, key=f"no_of_trees_{index}"
                     )
                 with col1b:
                     boolean_options = ["True", "False"]
-                    oob_score = st.selectbox("Use Out-of-Bag Score", options=boolean_options,key=f"oob_score_{index}")
+                    oob_score = st.selectbox("Use Out-of-Bag Score", options=boolean_options, key=f"oob_score_{index}")
                 with col1c:
                     random_state = st.number_input(
-                        "Random Seed",
-                        min_value=0,
-                        max_value=2**32 - 1,
-                        value=42,
-                        step=1,
-                        key=f"no_of_seed_{index}"
+                        "Random Seed", min_value=0, max_value=2**32 - 1, value=42, step=1, key=f"no_of_seed_{index}"
                     )
-            apply_button = st.button("Execute",key=f"execute_classification_{index}")
+            apply_button = st.button("Execute", key=f"execute_classification_{index}")
             if apply_button:
-                classifier_params={"n_estimators":n_estimators, "oob_score":bool(oob_score), "random_state":random_state}
-                seg_layer_name=st.session_state.active_segmentation_layer_name
+                classifier_params = {"n_estimators": n_estimators, "oob_score": bool(oob_score), "random_state": random_state}
+                seg_layer_name = st.session_state.active_segmentation_layer_name
 
                 layer = st.session_state.layers[seg_layer_name]
                 classification_layer = perform_supervised_classification(
-                    layer,
-                    selected_classifier,
-                    classifier_params,
-                    classification_name
+                    layer, selected_classifier, classifier_params, classification_name
                 )
                 if classification_layer:
-                    fig = plot_classification(classification_layer, class_field="classification",classes=st.session_state.classes)
+                    fig = plot_classification(classification_layer, class_field="classification", classes=st.session_state.classes)
                     process_data["output_fig"] = fig
                     # st.session_state.classification_fig = fig  # Store the figure in session state
 
@@ -1238,9 +1228,10 @@ def render_supervised_classification(index):
             # if "classification_fig" in st.session_state:
             #     st.pyplot(st.session_state.classification_fig)
         else:
-            st.error(f"Error: Sample data are not created")
+            st.error("Error: Sample data are not created")
     except Exception as e:
         st.error(f"Error: {str(e)}")
+
 
 def render_rule_based_classification(index):
     try:
@@ -1441,7 +1432,6 @@ def render_rule_builder(index):
         st.error(f"error: {str(e)}")
 
 
-
 # def render_classification_tab():
 #     """Render the classification tab for applying rule sets to segmentation layers."""
 #     st.header("Classification")
@@ -1533,9 +1523,9 @@ def render_rule_builder(index):
 
 #                     with col2b:
 #                         st.markdown("<div style='font-size: 14px;  margin-bottom: 4px;'>Color</div>", unsafe_allow_html=True)
-                        
+
 #                         new_class_color = st.color_picker("choose color", "#000000", label_visibility="collapsed", key="new_class_color")
-                        
+
 #                     if st.button("Add Class"):
 #                         if new_class and new_class not in st.session_state.classes:
 #                             st.session_state.classes[new_class] = {"color":new_class_color,"sample_ids":[]}
@@ -1701,7 +1691,7 @@ def render_rule_builder(index):
 
 #                     if "classification_fig" in st.session_state:
 #                         st.pyplot(st.session_state.classification_fig)
-                    
+
 #             # 4. RULE-BASED REFINEMENT
 #             elif classification_step == "Rule-Based Refinement":
 #                 add_process_button = st.button("➕ Add process")
@@ -1728,7 +1718,7 @@ def render_rule_builder(index):
 #                         elif selected_operation == "Find Enclosed by Class":
 #                             render_enclosed_by_class(i)
 
-                
+
 #                     # cola,colb=st.columns([1,12])
 #                     # with cola:
 #                     #     if st.button("Save", key=f"save_{i}"):
@@ -1873,8 +1863,6 @@ def render_rule_builder(index):
 #                         st.rerun()
 
 
-
-
 def render_process_tab():
     try:
         # add_process_button = st.button("➕ Add process")
@@ -1883,15 +1871,25 @@ def render_process_tab():
         #         "id": len(st.session_state.processes),
         #         "type": ''  # Default process type
         #     })
-        OPERATION_LIST=['','Segmentation','Add features','Select Sample Data',"Supervised Classification", "Rule-based Classification",'Create Rule','Merge Region','Find Enclosed by Class']
+        OPERATION_LIST = [
+            "",
+            "Segmentation",
+            "Add features",
+            "Select Sample Data",
+            "Supervised Classification",
+            "Rule-based Classification",
+            "Create Rule",
+            "Merge Region",
+            "Find Enclosed by Class",
+        ]
 
         for i, process in enumerate(st.session_state.processes):
-            with st.expander(f"Process {i+1}: {process['type']}"):
+            with st.expander(f"Process {i + 1}: {process['type']}"):
                 selected_operation = st.selectbox(
                     "Select  Operation",
                     OPERATION_LIST,
-                    index=OPERATION_LIST.index(process['type']) if process['type'] in OPERATION_LIST else 0,
-                    key=f"operation_{i}"
+                    index=OPERATION_LIST.index(process["type"]) if process["type"] in OPERATION_LIST else 0,
+                    key=f"operation_{i}",
                 )
                 st.session_state.processes[i]["type"] = selected_operation
                 if selected_operation == "Segmentation":
@@ -1914,15 +1912,15 @@ def render_process_tab():
             if st.button("🗑️ Delete", key=f"delete_{i}"):
                 st.session_state.delete_index = i
                 st.rerun()
-        
-        
-            
+
         add_process_button = st.button("➕ Add process", key="add_process")
         if add_process_button:
-            st.session_state.processes.append({
-                "id": len(st.session_state.processes),
-                "type": ''  # Default process type
-            })
+            st.session_state.processes.append(
+                {
+                    "id": len(st.session_state.processes),
+                    "type": "",  # Default process type
+                }
+            )
 
         if st.session_state.delete_index is not None:
             del st.session_state.processes[st.session_state.delete_index]
@@ -1930,6 +1928,7 @@ def render_process_tab():
             st.rerun()
     except Exception as e:
         st.error(f"error: {str(e)}")
+
 
 def render_layer_manager_tab():
     """Render the layer manager tab for managing segmentation and classification layers."""
