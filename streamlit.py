@@ -1005,7 +1005,7 @@ def render_enclosed_by_class(index):
 
             st.markdown("<div style='font-size: 14px;  margin-bottom: 4px;'>Color</div>", unsafe_allow_html=True)
                 
-            new_class_color_1 = st.color_picker("choose color", "#000000", label_visibility="collapsed", key="new_class_color_1")
+            new_class_color_1 = st.color_picker("choose color", "#000000", label_visibility="collapsed", key=f"new_class_color_{index}")
             
         st.session_state.classes[new_class_name] = {"color":new_class_color_1,"sample_ids":[]}
 
@@ -1031,15 +1031,18 @@ def render_select_samples(index):
         with col1:
             st.markdown("#### ➕ Add New Class")
             col2a, col2b = st.columns([2, 1])  # Adjust ratio as needed
+
             with col2a:
-                new_class = st.text_input("Class Name", key="new_class_input")
+                new_class = st.text_input("Class Name", key=f"new_class_input_{index}")
+                
 
             with col2b:
                 st.markdown("<div style='font-size: 14px;  margin-bottom: 4px;'>Color</div>", unsafe_allow_html=True)
                 
-                new_class_color = st.color_picker("choose color", "#000000", label_visibility="collapsed", key="new_class_color")
-                
-            if st.button("Add Class"):
+                new_class_color = st.color_picker("choose color", "#000000", label_visibility="collapsed", key=f"new_class_color_{index}")
+            
+
+            if st.button("Add Class",key=f"add_class_{index}"):
                 if new_class and new_class not in st.session_state.classes:
                     st.session_state.classes[new_class] = {"color":new_class_color,"sample_ids":[]}
                     st.success(f"Class '{new_class}' added!")
@@ -1048,7 +1051,7 @@ def render_select_samples(index):
                 else:
                     st.error("Please enter a class name.")
 
-            selected_class = st.radio("Select Class", list(st.session_state.classes.keys()), key="class_radio")
+            selected_class = st.radio("Select Class", list(st.session_state.classes.keys()), key=f"class_radio_{index}")
 
             st.markdown("##### Classes")
             for class_name, class_info in st.session_state.classes.items():
@@ -1064,7 +1067,8 @@ def render_select_samples(index):
             st.markdown("### Click Segments on Interactive Map")
 
             # Select the input layer
-            input_layer = st.selectbox("Select input layer:", options=list(st.session_state.layers.keys()))
+            
+            input_layer = st.selectbox("Select input layer:", options=list(st.session_state.layers.keys()),key=f"select_box_{index}")
             st.session_state.active_segmentation_layer_name=input_layer
             layer = st.session_state.layers[input_layer]
             segments = layer.raster
@@ -1073,6 +1077,7 @@ def render_select_samples(index):
 
             image_data = st.session_state.image_data
             rgb_bands = (3, 2, 1)  # Adjust as needed
+
 
             # Create RGB base image (grayscale fallback)
             if image_data.shape[0] >= 3:
@@ -1089,6 +1094,7 @@ def render_select_samples(index):
                 gray = image_data[0]
                 gray_norm = (gray - gray.min()) / (gray.max() - gray.min() + 1e-10)
                 base_img = np.stack([gray_norm] * 3, axis=2)
+            
 
             # Assign colors to labeled segments
             segment_colored_img = (base_img * 255).astype(np.uint8).copy()
@@ -1104,6 +1110,7 @@ def render_select_samples(index):
                     mask = segments == seg_id
                     for c in range(3):  # RGB channels
                         segment_colored_img[:, :, c][mask] = color_rgb[c]
+            
 
             # Overlay segment boundaries
             overlay = mark_boundaries(segment_colored_img/255, segments, color=(1, 1, 0), mode="thick")
@@ -1136,10 +1143,12 @@ def render_select_samples(index):
                 cross_origin=False
             ).add_to(fmap)
             folium.LayerControl().add_to(fmap)
+            st.write(f"Index used for selcndmnecnkntbox: {index}")
 
             # Display the map and handle click events
-            click_info = st_folium(fmap, height=600, width=700)
-
+            click_info = st_folium(fmap, height=600, width=700,key=f"map_folium_{index}")
+            st.write(f"Index used for selcndmnecnkntbox: {index}")
+            
             # Process click events
             if click_info and click_info.get("last_clicked"):
                 lat = click_info["last_clicked"]["lat"]
@@ -1179,9 +1188,10 @@ def render_supervised_classification(index):
                 classifier_list=["Random Forest"]
                 selected_classifier = st.selectbox("Choose a classifier",
                 options=classifier_list,
-                index=0)
+                index=0,
+                key=f"select_classifier_{index}")
             with col2:
-                classification_name = st.text_input("Layer Name", "Supervised_Classification")
+                classification_name = st.text_input("Layer Name", "Supervised_Classification",key=f"classification_name_{index}")
             col1a, col1b,col1c= st.columns(3)
             if selected_classifier=="Random Forest":
                 with col1a:
@@ -1190,20 +1200,22 @@ def render_supervised_classification(index):
                         min_value=10,
                         max_value=1000,
                         value=100,
-                        step=10
+                        step=10,
+                        key=f"no_of_trees_{index}"
                     )
                 with col1b:
                     boolean_options = ["True", "False"]
-                    oob_score = st.selectbox("Use Out-of-Bag Score", options=boolean_options)
+                    oob_score = st.selectbox("Use Out-of-Bag Score", options=boolean_options,key=f"oob_score_{index}")
                 with col1c:
                     random_state = st.number_input(
                         "Random Seed",
                         min_value=0,
                         max_value=2**32 - 1,
                         value=42,
-                        step=1
+                        step=1,
+                        key=f"no_of_seed_{index}"
                     )
-            apply_button = st.button("Execute",key=f"execute_classification")
+            apply_button = st.button("Execute",key=f"execute_classification_{index}")
             if apply_button:
                 classifier_params={"n_estimators":n_estimators, "oob_score":bool(oob_score), "random_state":random_state}
                 seg_layer_name=st.session_state.active_segmentation_layer_name
@@ -1865,12 +1877,12 @@ def render_rule_builder(index):
 
 def render_process_tab():
     try:
-        add_process_button = st.button("➕ Add process")
-        if add_process_button:
-            st.session_state.processes.append({
-                "id": len(st.session_state.processes),
-                "type": ''  # Default process type
-            })
+        # add_process_button = st.button("➕ Add process")
+        # if add_process_button:
+        #     st.session_state.processes.append({
+        #         "id": len(st.session_state.processes),
+        #         "type": ''  # Default process type
+        #     })
         OPERATION_LIST=['','Segmentation','Add features','Select Sample Data',"Supervised Classification", "Rule-based Classification",'Create Rule','Merge Region','Find Enclosed by Class']
 
         for i, process in enumerate(st.session_state.processes):
@@ -1902,6 +1914,15 @@ def render_process_tab():
             if st.button("🗑️ Delete", key=f"delete_{i}"):
                 st.session_state.delete_index = i
                 st.rerun()
+        
+        
+            
+        add_process_button = st.button("➕ Add process", key="add_process")
+        if add_process_button:
+            st.session_state.processes.append({
+                "id": len(st.session_state.processes),
+                "type": ''  # Default process type
+            })
 
         if st.session_state.delete_index is not None:
             del st.session_state.processes[st.session_state.delete_index]
