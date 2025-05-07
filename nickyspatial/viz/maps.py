@@ -5,6 +5,7 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import ListedColormap
+import random
 
 
 def plot_layer(
@@ -84,7 +85,47 @@ def plot_layer(
     return fig
 
 
-def plot_classification(layer, class_field="classification", figsize=(12, 10), legend=True):
+# def plot_classification(layer, class_field="classification", figsize=(12, 10), legend=True, classes=[]):
+#     """Plot classified segments with different colors for each class."""
+#     fig, ax = plt.subplots(figsize=figsize)
+
+#     if class_field not in layer.objects.columns:
+#         raise ValueError(f"Class field '{class_field}' not found in layer objects")
+
+#     class_values = [v for v in layer.objects[class_field].unique() if v is not None]
+
+#     num_classes = len(class_values)
+
+#     colors = plt.cm.tab20(np.linspace(0, 1, max(num_classes, 1)))
+
+#     cmap = ListedColormap(colors)
+#     class_map = {value: i for i, value in enumerate(class_values)}
+#     layer.objects["_class_id"] = layer.objects[class_field].map(class_map)
+
+#     layer.objects.plot(
+#         column="_class_id",
+#         cmap=cmap,
+#         ax=ax,
+#         edgecolor="black",
+#         linewidth=0.5,
+#         legend=False,
+#     )
+
+#     if legend and len(class_values) > 0:
+#         patches = [mpatches.Patch(color=colors[i], label=value) for i, value in enumerate(class_values)]
+#         ax.legend(handles=patches, loc="upper right", title=class_field)
+
+#     ax.set_title(f"Classification by {class_field}")
+#     ax.set_xlabel("X Coordinate")
+#     ax.set_ylabel("Y Coordinate")
+
+#     if "_class_id" in layer.objects.columns:
+#         layer.objects = layer.objects.drop(columns=["_class_id"])
+
+#     return fig
+
+
+def plot_classification(layer, class_field="classification", figsize=(12, 10), legend=True, classes={}):
     """Plot classified segments with different colors for each class."""
     fig, ax = plt.subplots(figsize=figsize)
 
@@ -92,9 +133,32 @@ def plot_classification(layer, class_field="classification", figsize=(12, 10), l
         raise ValueError(f"Class field '{class_field}' not found in layer objects")
 
     class_values = [v for v in layer.objects[class_field].unique() if v is not None]
-    num_classes = len(class_values)
-    colors = plt.cm.tab20(np.linspace(0, 1, max(num_classes, 1)))
-    cmap = ListedColormap(colors)
+
+    # generate base colormap
+    base_colors = plt.cm.tab20(np.linspace(0, 1, max(len(class_values), 1)))
+
+    colors_list = []
+    for idx, class_value in enumerate(class_values):
+        if class_value in list(classes.keys()):
+            # reuse stored color
+            color_hex = classes[class_value]["color"]
+        else:
+            # assign new color (from tab20 or random if exceeds)
+            if idx < len(base_colors):
+                rgb = base_colors[idx][:3]
+                color_hex = "#{:02x}{:02x}{:02x}".format(int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
+            else:
+                color_hex = "#{:06x}".format(random.randint(0, 0xFFFFFF))
+            classes[class_value] = {"color": color_hex, "sample_ids": []}
+
+        # convert hex → RGB tuple for ListedColormap
+        rgb_tuple = tuple(int(color_hex[i:i+2], 16)/255 for i in (1,3,5))
+        colors_list.append(rgb_tuple)
+
+    # create colormap
+    cmap = ListedColormap(colors_list)
+
+    # map class values to indices
     class_map = {value: i for i, value in enumerate(class_values)}
     layer.objects["_class_id"] = layer.objects[class_field].map(class_map)
 
@@ -108,17 +172,22 @@ def plot_classification(layer, class_field="classification", figsize=(12, 10), l
     )
 
     if legend and len(class_values) > 0:
-        patches = [mpatches.Patch(color=colors[i], label=value) for i, value in enumerate(class_values)]
+        patches = [
+            mpatches.Patch(color=classes[value]["color"], label=value)
+            for value in class_values
+        ]
         ax.legend(handles=patches, loc="upper right", title=class_field)
 
     ax.set_title(f"Classification by {class_field}")
     ax.set_xlabel("X Coordinate")
     ax.set_ylabel("Y Coordinate")
 
+    # cleanup temporary column
     if "_class_id" in layer.objects.columns:
         layer.objects = layer.objects.drop(columns=["_class_id"])
 
     return fig
+
 
 
 def plot_comparison(
