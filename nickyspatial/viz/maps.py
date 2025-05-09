@@ -126,7 +126,7 @@ def plot_layer(
 #     return fig
 
 
-def plot_classification(layer, class_field="classification", figsize=(12, 10), legend=True, classes={}):
+def plot_classification(layer, class_field="classification", figsize=(12, 10), legend=True, classes=None):
     """Plot classified segments with different colors for each class."""
     fig, ax = plt.subplots(figsize=figsize)
 
@@ -140,7 +140,7 @@ def plot_classification(layer, class_field="classification", figsize=(12, 10), l
 
     colors_list = []
     for idx, class_value in enumerate(class_values):
-        if class_value in list(classes.keys()):
+        if classes and class_value in list(classes.keys()):
             # reuse stored color
             color_hex = classes[class_value]["color"]
         else:

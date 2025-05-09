@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+"""Implements supervised classification algorithms to classify the segments."""
 
 from sklearn.ensemble import RandomForestClassifier
 
@@ -7,10 +7,11 @@ from .layer import Layer
 
 
 class SupervisedClassification:
-    # TODO: name vs layer_name
     """Implementation of Supervised Classification algorithm."""
 
-    def __init__(self, name=None, classifier_type="Random Forest", classifier_params={}):
+    # TODO: name vs layer_name
+
+    def __init__(self, name=None, classifier_type="Random Forest", classifier_params=None):
         """Initialize the segmentation algorithm.
 
         Parameters:
@@ -67,34 +68,72 @@ class SupervisedClassification:
         bands : list of str
             Names of the bands
         """
-        X = self.training_layer.drop(columns=["segment_id", "classification", "geometry"], errors="ignore")
+        x = self.training_layer.drop(columns=["segment_id", "classification", "geometry"], errors="ignore")
         y = self.training_layer["classification"]
 
         if self.classifier_type == "Random Forest":
             self.classifier = RandomForestClassifier(**self.classifier_params)
 
-            self.classifier.fit(X, y)
+            self.classifier.fit(x, y)
 
         print("OOB Score:", self.classifier.oob_score_)
 
         return self.classifier
 
     def _prediction(self, layer):
-        layer["classification"] = ""
-        print(layer.columns)
-        X = layer.drop(columns=["segment_id", "classification", "geometry"], errors="ignore")
+        """Perform classification prediction on input layer features.
 
-        predictions = self.classifier.predict(X)
+        Parameters
+        ----------
+        layer : geopandas.GeoDataFrame
+            Input data containing at least a 'segment_id' and 'geometry' column, along with
+            feature columns required by the classifier. If a 'classification' column does not
+            exist, it will be created.
+
+        Returns:
+        -------
+        The input layer with an updated 'classification' column containing predicted labels.
+
+        """
+        layer["classification"] = ""
+        # print(layer.columns)
+        x = layer.drop(columns=["segment_id", "classification", "geometry"], errors="ignore")
+
+        predictions = self.classifier.predict(x)
         layer.loc[layer["classification"] == "", "classification"] = predictions
         return layer
 
     def execute(
         self,
         source_layer,
-        samples={},
+        samples,
         layer_manager=None,
         layer_name=None,
     ):
+        """Execute the supervised classification workflow on the source layer.
+
+        This method creates a new layer by copying the input source layer, training a classifier
+        using provided samples, predicting classifications, and storing the results in a new layer.
+        Optionally, the resulting layer can be added to a layer manager.
+
+        Parameters
+        ----------
+        source_layer : Layer
+            The input layer containing spatial objects and metadata (transform, CRS, raster).
+        samples : dict
+            A dictionary of training samples where keys are class labels and values are lists
+            of segment IDs or features used for training. Default is an empty dictionary.
+        layer_manager : LayerManager, optional
+            An optional layer manager object used to manage and store the resulting layer.
+        layer_name : str, optional
+            The name to assign to the resulting classified layer.
+
+        Returns:
+        -------
+        Layer
+            A new Layer object containing the predicted classifications, copied metadata from
+            the source layer, and updated attributes.
+        """
         result_layer = Layer(name=layer_name, parent=source_layer, type="merged")
         result_layer.transform = source_layer.transform
         result_layer.crs = source_layer.crs

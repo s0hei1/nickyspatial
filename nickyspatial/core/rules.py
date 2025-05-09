@@ -439,8 +439,7 @@ class TouchedByRuleSet(CommonBase):
     def execute(
         self, source_layer, class_column_name, class_value_a, class_value_b, new_class_name, layer_manager=None, layer_name=None
     ):
-        """Executes the merge rule set by identifying and updating segments of a given class that are
-        adjacent to segments of another class.
+        """Executes the merge rule set by identifying and updating segments of a given class that are adjacent to another class!
 
         Parameters:
         - source_layer: Layer
@@ -468,6 +467,7 @@ class TouchedByRuleSet(CommonBase):
         - Iterates through each segment of class_value_a, checking if any of its neighbors belong to class_value_b.
         - If so, updates the segment's class to new_class_name.
         - Stores the modified DataFrame in the result layer and optionally registers it via the layer_manager.
+
         """
         if not layer_name:
             layer_name = f"{source_layer.name}_{self.name}"

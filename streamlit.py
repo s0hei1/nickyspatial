@@ -558,6 +558,7 @@ def render_segmentation(index):
 
 
 def render_calculate_features(index):
+    """Render the UI for calculating features based on selected segmentation layer and band attributes."""
     try:
         st.subheader("Calculate Features")
 
@@ -876,6 +877,7 @@ def render_calculate_features(index):
 
 
 def render_merge_regions(index):
+    """Render merge regions algorithm."""
     try:
         process_data = st.session_state.processes[index]
         if "params" not in process_data:
@@ -941,6 +943,7 @@ def render_merge_regions(index):
 
 
 def render_enclosed_by_class(index):
+    """Render elclosed_by_class algorithm."""
     try:
         process_data = st.session_state.processes[index]
         if "params" not in process_data:
@@ -961,8 +964,8 @@ def render_enclosed_by_class(index):
             layer_objects = layer.objects
             try:
                 value_option_list = list(layer_objects["classification"].unique())
-            except:
-                st.error("Layer is invalid")
+            except Exception as e:
+                st.error(f"Layer is invalid: {str(e)}")
                 st.stop()
         with col2:
             layer_name = st.text_input(
@@ -1032,6 +1035,7 @@ def render_enclosed_by_class(index):
 
 
 def render_select_samples(index):
+    """Render select samples window that allows to create the class and select the samples interactively."""
     try:
         st.markdown("### Sample Collection")
 
@@ -1072,7 +1076,6 @@ def render_select_samples(index):
                     f"</div>",
                     unsafe_allow_html=True,
                 )
-            # selected_class = st.radio("Select Class", list(st.session_state.classes.keys()), key="class_radio") if st.session_state.classes else None
         with col2:
             st.markdown("### Click Segments on Interactive Map")
 
@@ -1110,7 +1113,7 @@ def render_select_samples(index):
             segment_colored_img = (base_img * 255).astype(np.uint8).copy()
 
             # Assign colors to labeled segments
-            for class_name, class_data in st.session_state.classes.items():
+            for _class_name, class_data in st.session_state.classes.items():
                 color = class_data["color"]
                 if color.startswith("#"):
                     color_rgb = [int(color[i : i + 2], 16) for i in (1, 3, 5)]
@@ -1146,11 +1149,11 @@ def render_select_samples(index):
                 name="Colored Segments", image=tmp_path, bounds=bounds, opacity=0.8, interactive=True, cross_origin=False
             ).add_to(fmap)
             folium.LayerControl().add_to(fmap)
-            st.write(f"Index used for selcndmnecnkntbox: {index}")
+            # st.write(f"Index used for selcndmnecnkntbox: {index}")
 
             # Display the map and handle click events
             click_info = st_folium(fmap, height=600, width=700, key=f"map_folium_{index}")
-            st.write(f"Index used for selcndmnecnkntbox: {index}")
+            # st.write(f"Index used for selcndmnecnkntbox: {index}")
 
             # Process click events
             if click_info and click_info.get("last_clicked"):
@@ -1162,7 +1165,7 @@ def render_select_samples(index):
                 if 0 <= row < segments.shape[0] and 0 <= col < segments.shape[1]:
                     seg_id = int(segments[row, col])
                     found = False
-                    for class_name, class_data in st.session_state.classes.items():
+                    for _class_name, class_data in st.session_state.classes.items():
                         if seg_id in class_data["sample_ids"]:
                             found = True
                             break
@@ -1179,6 +1182,7 @@ def render_select_samples(index):
 
 
 def render_supervised_classification(index):
+    """Render the classification window for applying supervised classification to segmentation layers."""
     try:
         process_data = st.session_state.processes[index]
         if "params" not in process_data:
@@ -1234,6 +1238,7 @@ def render_supervised_classification(index):
 
 
 def render_rule_based_classification(index):
+    """Render the rule based classification."""
     try:
         st.subheader("Apply Rule Sets")
 
@@ -1300,8 +1305,8 @@ def render_rule_based_classification(index):
 
 
 def render_rule_builder(index):
+    """Render the rule builder tab for creating and managing classification rule sets."""
     try:
-        """Render the rule builder tab for creating and managing classification rule sets."""
         st.header("Rule Builder")
         st.write("Create and manage classification rule sets and rules")
 
@@ -1439,7 +1444,8 @@ def render_rule_builder(index):
 #     if not st.session_state.layers:
 #         st.warning("No segmentation layers available. Run segmentation first.")
 #     else:
-#         sub_tab = st.radio("Select a classification type", ["Rule-based Classification", "Supervised Classification"], horizontal=True)
+#         sub_tab = st.radio("Select a classification type", ["Rule-based Classification",
+#                            "Supervised Classification"], horizontal=True)
 
 #         if sub_tab == "Rule-based Classification":
 #             st.subheader("Apply Rule Sets")
@@ -1478,12 +1484,15 @@ def render_rule_builder(index):
 #                                 for class_name, area in area_stats.get("class_areas", {}).items():
 #                                     percentage = area_stats.get("class_percentages", {}).get(class_name, 0)
 #                                     stats_data.append(
-#                                         {"Class": class_name, "Area (sq. units)": f"{area:.2f}", "Percentage": f"{percentage:.1f}%"}
+#                                         {"Class": class_name,
+#                                           "Area (sq. units)": f"{area:.2f}",
+#                                           "Percentage": f"{percentage:.1f}%"}
 #                                     )
 
 #                                 st.table(stats_data)
 
-#                             st.success(f"Rule set '{selected_ruleset}' applied successfully to create layer '{output_layer_name}'!")
+#                             st.success(f"Rule set '{selected_ruleset}' applied successfully to create layer"
+#                                        f"{output_layer_name}!")
 
 #             st.subheader("Load Example Rule Sets")
 
@@ -1524,7 +1533,10 @@ def render_rule_builder(index):
 #                     with col2b:
 #                         st.markdown("<div style='font-size: 14px;  margin-bottom: 4px;'>Color</div>", unsafe_allow_html=True)
 
-#                         new_class_color = st.color_picker("choose color", "#000000", label_visibility="collapsed", key="new_class_color")
+#                         new_class_color = st.color_picker("choose color",
+#                                                       "#000000",
+#                                                       label_visibility="collapsed",
+#                                                        key="new_class_color")
 
 #                     if st.button("Add Class"):
 #                         if new_class and new_class not in st.session_state.classes:
@@ -1535,7 +1547,8 @@ def render_rule_builder(index):
 #                         else:
 #                             st.error("Please enter a class name.")
 
-#                     selected_class = st.radio("🎯 Select Class", list(st.session_state.classes.keys()), key="class_radio") if st.session_state.classes else None
+#                     selected_class = st.radio("Select Class", list(st.session_state.classes.keys()),
+#                                           key="class_radio") if st.session_state.classes else None
 #                 with col2:
 #                     st.markdown("### Click Segments on Interactive Map")
 
@@ -1864,6 +1877,7 @@ def render_rule_builder(index):
 
 
 def render_process_tab():
+    """Render the process tab for running available algorithms."""
     try:
         # add_process_button = st.button("➕ Add process")
         # if add_process_button:
@@ -1871,7 +1885,7 @@ def render_process_tab():
         #         "id": len(st.session_state.processes),
         #         "type": ''  # Default process type
         #     })
-        OPERATION_LIST = [
+        operation_list = [
             "",
             "Segmentation",
             "Add features",
@@ -1887,8 +1901,8 @@ def render_process_tab():
             with st.expander(f"Process {i + 1}: {process['type']}"):
                 selected_operation = st.selectbox(
                     "Select  Operation",
-                    OPERATION_LIST,
-                    index=OPERATION_LIST.index(process["type"]) if process["type"] in OPERATION_LIST else 0,
+                    operation_list,
+                    index=operation_list.index(process["type"]) if process["type"] in operation_list else 0,
                     key=f"operation_{i}",
                 )
                 st.session_state.processes[i]["type"] = selected_operation
