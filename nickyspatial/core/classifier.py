@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from .layer import Layer
 
 
-class SupervisedClassification:
+class SupervisedClassifier:
     """Implementation of Supervised Classification algorithm."""
 
     # TODO: name vs layer_name
@@ -43,16 +43,12 @@ class SupervisedClassification:
         segment_objects : geopandas.GeoDataFrame
             GeoDataFrame with segment polygons
         """
-        # cropland_idxs=[11,396,489,1400,3818,1532,1470,810,594,1224,1388,13] #class=1
-        # meadow_idxs=[376,1040,44,2229,1099,514,65,3533,983,807] #class=2
-        # training_layer=source_layer.objects
-        # training_layer=layer
-        layer["classification"] = ""
+        layer["classification"] = None
 
         for class_name in samples.keys():
             layer.loc[layer["segment_id"].isin(samples[class_name]), "classification"] = class_name
 
-        layer = layer[layer["classification"] != ""]
+        layer = layer[layer["classification"].notna()]
         self.training_layer = layer
         return layer
 
