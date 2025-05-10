@@ -69,7 +69,7 @@ For detailed documentation and examples, see the [documentation website](#).
 
 ## Examples
 
-Check out the [examples](./docs/examples/) directory for more examples:
+Check out the 'examples' directory for more examples:
 
 TODO : Add example scripts here
 

@@ -42,10 +42,23 @@ plugins:
   - mkdocs-jupyter
   - git-revision-date-localized:
       enable_creation_date: true
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            extra:
+              show_source: true
+              show_signature: true
+              show_root_heading: true
+              show_docstring: true
+              show_submodules: true
 
 nav :
  - Home: index.md
+ - Package Reference: reference.md
  - Contribute:
     - Installation: dev.md
  - Examples:
     - Basic: examples/simple_usecase.ipynb
+    - Suvervised: examples/supervised_classification.ipynb
