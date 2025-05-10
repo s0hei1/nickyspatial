@@ -75,12 +75,18 @@ def initialize_session_state():
         st.session_state.active_segmentation_layer_name = {}
     # if "classification_fig" not in st.session_state: #TODO: Handle is dynamically
     #     st.session_state.classification_fig=None
-    if "merged_fig" not in st.session_state:
-        st.session_state.merged_fig = None
+    # if "merged_fig" not in st.session_state:
+    # st.session_state.merged_fig = None
     if "processes" not in st.session_state:
         st.session_state.processes = []
     if "delete_index" not in st.session_state:
         st.session_state.delete_index = None
+    if "expanders" not in st.session_state:
+        st.session_state.expanders = {}
+    if "edit_mode" not in st.session_state:
+        st.session_state.edit_mode = False
+    if "edit_index" not in st.session_state:
+        st.session_state.edit_index = None
 
 
 def load_raster(file_path):
@@ -758,15 +764,65 @@ def render_select_samples(index):
             selected_class = st.radio("Select Class", list(st.session_state.classes.keys()), key=f"class_radio_{index}")
 
             st.markdown("##### Classes")
-            for class_name, class_info in st.session_state.classes.items():
-                color = class_info["color"]
-                st.markdown(
-                    f"<div style='display:inline-flex;align-items:center;margin-bottom:4px;'>"
-                    f"<div style='width:15px;height:15px;background:{color};border:1px solid black;margin-right:8px;'></div>"
-                    f"{class_name}"
-                    f"</div>",
-                    unsafe_allow_html=True,
-                )
+            class_names = list(st.session_state.classes.keys())
+
+            for idx, class_name in enumerate(class_names):
+                # for class_name, class_info in st.session_state.classes.items():
+
+                # color = class_info["color"]
+                color = st.session_state.classes[class_name]["color"]
+                col1a, col2b, col3c = st.columns([0.8, 0.20, 0.20])
+
+                with col1a:
+                    # st.markdown(f"<div style='padding-top: 5px;'>{class_name}</div>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<div style='display:inline-flex;align-items:center;margin-bottom:0px;'>"
+                        f"<div style='width:25px;height:25px;background:{color};border:1px solid black;margin-right:8px;'></div>"
+                        f"{class_name}"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
+
+                with col2b:
+                    if st.button("✏️", key=f"edit_{class_name}"):
+                        st.session_state["edit_index"] = idx
+                        st.session_state["edit_mode"] = True
+
+                with col3c:
+                    if st.button("🗑️", key=f"delete_{class_name}"):
+                        del st.session_state.classes[class_name]
+                        st.rerun()
+
+            if st.session_state.edit_mode and st.session_state.edit_index is not None:
+                edit_idx = st.session_state.edit_index
+                class_name = class_names[edit_idx]
+                current_color = st.session_state.classes[class_name]["color"]
+
+                st.subheader("Edit Class")
+                colb1, colb2 = st.columns([0.7, 0.3])
+                with colb1:
+                    new_name = st.text_input("Class name", value=class_name, key="edit_name")
+                with colb2:
+                    new_color = st.color_picker("Color", value=current_color, key="edit_color")
+
+                cola1, cola2 = st.columns([0.3, 0.5])
+                with cola1:
+                    if st.button("Update", key=f"save_changes_{index}"):
+                        # Apply changes
+                        st.session_state.classes[new_name] = {
+                            "color": new_color,
+                            "sample_ids": st.session_state.classes[class_name]["sample_ids"],
+                        }
+                        if new_name != class_name:
+                            del st.session_state.classes[class_name]
+                        st.session_state.edit_mode = False
+                        st.session_state.edit_index = None
+                        st.rerun()
+                with cola2:
+                    if st.button("Cancel", key=f"cancel_{index}"):
+                        st.session_state.edit_mode = False
+                        st.session_state.edit_index = None
+
         with col2:
             st.markdown("### Click Segments on Interactive Map")
 
@@ -1146,9 +1202,16 @@ def render_process_tab():
             "Merge Region",
             "Find Enclosed by Class",
         ]
+        if "expanders" not in st.session_state:
+            st.session_state.expanders = {}
 
         for i, process in enumerate(st.session_state.processes):
-            with st.expander(f"Process {i + 1}: {process['type']}"):
+            key = f"expander_{i}"
+            # Default: True (expanded) if not already tracked
+            if key not in st.session_state.expanders:
+                st.session_state.expanders[key] = True
+
+            with st.expander(f"Process {i + 1}: {process['type']}", expanded=st.session_state.expanders[key]):
                 selected_operation = st.selectbox(
                     "Select  Operation",
                     operation_list,
