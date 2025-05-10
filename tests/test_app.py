@@ -14,9 +14,13 @@ import shutil
 import pytest
 
 from nickyspatial import (
+    EnclosedByRuleSet,
     LayerManager,
+    MergeRuleSet,
     MultiResolutionSegmentation,
     RuleSet,
+    SupervisedClassifier,
+    TouchedByRuleSet,
     attach_area_stats,
     attach_ndvi,
     attach_shape_metrics,
@@ -172,3 +176,83 @@ def test_full_workflow(test_raster_path):
     # Print the available layers.
     available_layers = manager.get_layer_names()
     assert len(available_layers) >= 3, "Expected at least three layers in manager."
+
+    """Supervised Classification Test Start"""
+    # Step 1: Perform segmentation.
+    segmenter = MultiResolutionSegmentation(scale=20, compactness=1)
+    segmentation_layer = segmenter.execute(image_data, transform, crs, layer_manager=manager, layer_name="Base_Segmentation")
+    assert segmentation_layer is not None, "Segmentation layer was not created."
+
+    # Step 2: define samples and colors
+    samples = {
+        "Water": [41, 134, 246, 491],
+        "built-up": [12, 499, 290, 484],
+        "vegetation": [36, 143, 239, 588, 371],
+    }
+    classes_color = {"Water": "#3437c2", "built-up": "#de1421", "vegetation": "#0f6b2f"}
+    # Step 3: RF Supervised Classification implementation
+    params = {"n_estimators": 100, "oob_score": True, "random_state": 42}
+    rf_classification = SupervisedClassifier(name="RF Classification", classifier_type="Random Forest", classifier_params=params)
+    rf_classification_layer = rf_classification.execute(
+        segmentation_layer,
+        samples=samples,
+        layer_manager=manager,
+        layer_name="RF Classification",
+    )
+    fig5 = plot_classification(rf_classification_layer, class_field="classification", class_color=classes_color)
+    assert rf_classification_layer is not None, "RF classification layer was not created."
+    rf_classification_img_path = os.path.join(output_dir, "5_RF_classification.png")
+    fig5.savefig(rf_classification_img_path)
+    assert os.path.exists(rf_classification_img_path), "RF Classification layer not saved."
+
+    # Step 4: Apply merge segements based on class
+    merger = MergeRuleSet("MergeByVegAndType")
+    class_value = ["Water", "vegetation"]
+    merged_layer = merger.execute(
+        source_layer=rf_classification_layer,
+        class_column_name="classification",
+        class_value=class_value,
+        layer_manager=manager,
+        layer_name="Merged RF Classification",
+    )
+    assert merged_layer is not None, "Merged layer was not created."
+    fig6 = plot_classification(merged_layer, class_field="classification", class_color=classes_color)
+    merged_img_path = os.path.join(output_dir, "5_merged.png")
+    fig6.savefig(merged_img_path)
+    assert os.path.exists(merged_img_path), "Merged_by layer not saved."
+
+    # Step 5: Apply enclosed_by rule
+    encloser_rule = EnclosedByRuleSet()
+    enclosed_by_layer = encloser_rule.execute(
+        source_layer=merged_layer,
+        class_column_name="classification",
+        class_value_a="vegetation",
+        class_value_b="built-up",
+        new_class_name="park",
+        layer_manager=manager,
+        layer_name="enclosed_by_layer",
+    )
+    assert enclosed_by_layer is not None, "Enclosed_by layer was not created."
+    classes_color["park"] = "#d2f7dc"
+    fig7 = plot_classification(enclosed_by_layer, class_field="classification", class_color=classes_color)
+    enclosed_img_path = os.path.join(output_dir, "7_enclosed_by.png")
+    fig7.savefig(enclosed_img_path)
+    assert os.path.exists(enclosed_img_path), "Enclosed_by layer not saved."
+
+    # Step 6: Apply touched_by rule
+    touched_by_rule = TouchedByRuleSet()
+    touched_by_layer = touched_by_rule.execute(
+        source_layer=enclosed_by_layer,
+        class_column_name="classification",
+        class_value_a="built-up",
+        class_value_b="Water",
+        new_class_name="Water front builtup",
+        layer_manager=manager,
+        layer_name="touched_by_layer",
+    )
+    assert touched_by_layer is not None, "Touched_by layer was not created."
+    classes_color["Water front builtup"] = "#cc32cf"
+    fig8 = plot_classification(touched_by_layer, class_field="classification", class_color=classes_color)
+    touched_img_path = os.path.join(output_dir, "8_touched_by.png")
+    fig8.savefig(touched_img_path)
+    assert os.path.exists(touched_img_path), "Touched_by layer not saved."
