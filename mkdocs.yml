@@ -42,10 +42,13 @@ plugins:
   - mkdocs-jupyter
   - git-revision-date-localized:
       enable_creation_date: true
-
+  - mkdocstrings:
+      default_handler: python
 nav :
  - Home: index.md
+ - Package Reference: reference.md
  - Contribute:
     - Installation: dev.md
  - Examples:
     - Basic: examples/simple_usecase.ipynb
+    - Suvervised: examples/supervised_classification.ipynb
