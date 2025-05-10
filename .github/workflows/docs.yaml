@@ -25,7 +25,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Install dependencies
-        run: uv sync --group=docs
+        run: uv sync --all-extras
 
       - name: Build MkDocs Site
         run: uv run mkdocs build
