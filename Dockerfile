@@ -42,6 +42,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
 
-EXPOSE 8501
+EXPOSE 8080
 
 CMD ["python", "-m", "nickyspatial"]
