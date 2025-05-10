@@ -20,8 +20,9 @@ __version__ = "0.0.9"
 __author__ = "Kshitij Raj Sharma"
 
 from .core.layer import Layer, LayerManager
-from .core.rules import Rule, RuleSet
+from .core.rules import Rule, RuleSet, MergeRuleSet, EnclosedByRuleSet, TouchedByRuleSet
 from .core.segmentation import MultiResolutionSegmentation
+from .core.classifier import SupervisedClassifier
 
 from .filters.spatial import merge_small_segments, select_by_area, smooth_boundaries
 from .filters.spectral import enhance_contrast, spectral_filter
@@ -40,4 +41,4 @@ from .stats.spectral import attach_ndvi, attach_spectral_indices
 from .utils.helpers import create_sample_data
 from .viz.charts import plot_histogram, plot_statistics
 
-from .viz.maps import plot_classification, plot_comparison, plot_layer
+from .viz.maps import plot_classification, plot_comparison, plot_layer, plot_layer_interactive
