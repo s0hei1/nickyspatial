@@ -1,3 +1,20 @@
+## v0.1.0 (2025-05-10)
+
+### Feat
+
+- add classes legend in select_sample window
+- restructured UI content by replacing add the tabs into add process format
+- add encloded_by operation in frontend and make the rule_based refinement dynamix
+- merge region fronted wip
+- RF implementation (sample collection and classification) done in frontend
+- supervised classification using Random Forest backend complete
+
+### Fix
+
+- all pre_commit issue
+- pre-commit issue
+- key error
+
 ## v0.0.9 (2025-04-05)
 
 ### Fix
