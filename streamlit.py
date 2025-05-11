@@ -27,6 +27,7 @@ from nickyspatial import (
     MultiResolutionSegmentation,
     RuleSet,
     SupervisedClassifier,
+    TouchedByRuleSet,
     attach_area_stats,
     attach_ndvi,
     attach_shape_metrics,
@@ -229,6 +230,28 @@ def perform_enclosed_by(layer, class_column_name, class_value_a, class_value_b, 
             return enclosed_by_layer
     except Exception as e:
         st.error(f"Error during enclosed_by_layer: {str(e)}")
+        return None
+
+
+def perform_touched_by(layer, class_column_name, class_value_a, class_value_b, new_class_name, layer_name):
+    """Perform segmentation on the image data."""
+    try:
+        with st.spinner("Performing merge regions..."):
+            touched_by_rule = TouchedByRuleSet()
+            touched_by_layer = touched_by_rule.execute(
+                source_layer=layer,
+                class_column_name=class_column_name,
+                class_value_a=class_value_a,
+                class_value_b=class_value_b,
+                new_class_name=new_class_name,
+                layer_manager=st.session_state.manager,
+                layer_name=layer_name,
+            )
+            st.session_state.layers[layer_name] = touched_by_layer
+            update_available_attributes()
+            return touched_by_layer
+    except Exception as e:
+        st.error(f"Error during touched_by_layer: {str(e)}")
         return None
 
 
@@ -749,6 +772,102 @@ def render_enclosed_by_class(index):
         st.error(f"Error: {str(e)}")
 
 
+def render_touched_by_class(index):
+    """Render elclosed_by_class algorithm."""
+    try:
+        process_data = st.session_state.processes[index]
+        if "params" not in process_data:
+            process_data["params"] = {}
+        col1, col2 = st.columns(2)
+
+        with col1:
+            input_layer = st.selectbox(
+                "Select input layer:",
+                options=list(st.session_state.layers.keys()),
+                key=f"input_layer_{index}",
+                index=list(st.session_state.layers.keys()).index(
+                    process_data["params"].get("input_layer", list(st.session_state.layers.keys())[0])
+                ),
+            )
+            process_data["params"]["input_layer"] = input_layer
+            layer = st.session_state.layers[input_layer]
+            layer_objects = layer.objects
+            try:
+                value_option_list = list(layer_objects["classification"].unique())
+            except Exception:
+                st.error("Layer is invalid")
+                st.stop()
+        with col2:
+            layer_name = st.text_input(
+                "Layer Name", value=process_data["params"].get("layer_name", "Touched by"), key=f"layer_name_{index}"
+            )
+            process_data["params"]["layer_name"] = layer_name
+
+        cola, colb, colc, cold = st.columns(4)
+
+        with cola:
+            # Ensure class_value is a list of valid options from value_option_list
+            class_value_a = process_data["params"].get("class_value", 0)
+            if class_value_a in value_option_list:
+                class_value_index = value_option_list.index(class_value_a)
+            else:
+                class_value_index = 0
+
+            # valid_default_values = [value for value in default_values if value in value_option_list]
+            class_value = st.selectbox(
+                "Select class", options=value_option_list, index=class_value_index, key=f"class_value_{index}"
+            )
+            process_data["params"]["class_value"] = class_value
+        with colb:
+            class_value_b = process_data["params"].get("enclosing_class_value", 0)
+            if class_value_b in value_option_list:
+                class_value_b_index = value_option_list.index(class_value_b)
+            else:
+                class_value_b_index = 0
+
+            enclosing_class_value = st.selectbox(
+                "Select enclosing class", options=value_option_list, index=class_value_b_index, key=f"enclosing_class_value_{index}"
+            )
+            process_data["params"]["enclosing_class_value"] = enclosing_class_value
+        with colc:
+            new_class_name = st.text_input(
+                "New Class Name", value=process_data["params"].get("new_class_name", "new_class"), key=f"new_class_{index}"
+            )
+
+            process_data["params"]["new_class_name"] = new_class_name
+        with cold:
+            st.markdown("<div style='font-size: 14px;  margin-bottom: 4px;'>Color</div>", unsafe_allow_html=True)
+
+            new_class_color_1 = st.color_picker(
+                "choose color", "#000000", label_visibility="collapsed", key=f"new_class_color_{index}"
+            )
+
+        st.session_state.classes[new_class_name] = {"color": new_class_color_1, "sample_ids": []}
+
+        execute_button = st.button("Execute", key=f"execute_touched_by_{index}")  # key=f"execute_touched_by_{index}"
+        if execute_button:
+            touched_by_layer = perform_touched_by(
+                layer,
+                class_column_name="classification",
+                class_value_a=class_value,
+                class_value_b=enclosing_class_value,
+                new_class_name=new_class_name,
+                layer_name=layer_name,
+            )
+            if touched_by_layer:
+                class_color = {}
+                for key in list(st.session_state.classes.keys()):
+                    class_color[key] = st.session_state.classes[key]["color"]
+
+                fig = plot_classification(touched_by_layer, class_field="classification", class_color=class_color)
+                process_data["output_fig"] = fig
+
+        if "output_fig" in process_data:
+            st.pyplot(process_data["output_fig"])
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
+
+
 def render_select_samples(index):
     """Render select samples window that allows to create the class and select the samples interactively."""
     try:
@@ -1229,6 +1348,7 @@ def render_process_tab():
             "Create Rule",
             "Merge Region",
             "Find Enclosed by Class",
+            "Touched_by",
         ]
         if "expanders" not in st.session_state:
             st.session_state.expanders = {}
@@ -1276,6 +1396,8 @@ def render_process_tab():
                     render_merge_regions(i)
                 elif selected_operation == "Find Enclosed by Class":
                     render_enclosed_by_class(i)
+                elif selected_operation == "Touched_by":
+                    render_touched_by_class(i)
 
             if st.button("🗑️ Delete", key=f"delete_{i}"):
                 st.session_state.delete_index = i
