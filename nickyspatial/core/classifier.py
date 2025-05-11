@@ -72,9 +72,10 @@ class SupervisedClassifier:
 
             self.classifier.fit(x, y)
 
-        print("OOB Score:", self.classifier.oob_score_)
+        test_accuracy = self.classifier.oob_score_
+        # print("OOB Score:", self.classifier.oob_score_)
 
-        return self.classifier
+        return self.classifier, test_accuracy
 
     def _prediction(self, layer):
         """Perform classification prediction on input layer features.
@@ -137,7 +138,7 @@ class SupervisedClassifier:
 
         layer = source_layer.objects.copy()
         self._training_sample(layer, samples)
-        self._train()
+        _, accuracy = self._train()
         layer = self._prediction(layer)
 
         result_layer.objects = layer
@@ -149,4 +150,4 @@ class SupervisedClassifier:
         if layer_manager:
             layer_manager.add_layer(result_layer)
 
-        return result_layer
+        return result_layer, accuracy

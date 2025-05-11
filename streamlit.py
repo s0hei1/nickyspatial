@@ -74,10 +74,6 @@ def initialize_session_state():
         st.session_state.classes = {}
     if "active_segmentation_layer_name" not in st.session_state:
         st.session_state.active_segmentation_layer_name = {}
-    # if "classification_fig" not in st.session_state: #TODO: Handle is dynamically
-    #     st.session_state.classification_fig=None
-    # if "merged_fig" not in st.session_state:
-    # st.session_state.merged_fig = None
     if "processes" not in st.session_state:
         st.session_state.processes = []
     if "delete_index" not in st.session_state:
@@ -175,7 +171,7 @@ def perform_supervised_classification(layer, selected_classifier, classifier_par
                 name="RF Classification", classifier_type=selected_classifier, classifier_params=classifier_params
             )
 
-            classification_layer = classifier.execute(
+            classification_layer, accuracy = classifier.execute(
                 layer,
                 samples=samples,
                 layer_manager=st.session_state.manager,
@@ -184,7 +180,7 @@ def perform_supervised_classification(layer, selected_classifier, classifier_par
 
             st.session_state.layers[classification_name] = classification_layer
             update_available_attributes()
-            return classification_layer
+            return classification_layer, accuracy
     except Exception as e:
         st.error(f"Error during supervised classification: {str(e)}")
         return None
@@ -369,14 +365,17 @@ def create_example_rule_sets():
 
 def render_segmentation(index):
     """Render the segmentation tab for image segmentation and feature calculation."""
-    st.header("Image Segmentation")
+    st.markdown("## Image Segmentation")
     st.write("Configure segmentation parameters and run the algorithm")
     process_data = st.session_state.processes[index]
     if "params" not in process_data:
         process_data["params"] = {}
-    col1, col2 = st.columns(2)
+
+    col1, col2, col3 = st.columns(3)
 
     with col1:
+        segmentation_name = st.text_input("Segmentation Layer Name", "Base_Segmentation", key=f"seg_name_{index}")
+    with col2:
         scale_param = st.slider(
             "Scale Parameter",
             min_value=5,
@@ -386,7 +385,7 @@ def render_segmentation(index):
             help="Controls the size of segments. Higher values create larger segments.",
             key=f"scale_param_{index}",
         )
-
+    with col3:
         compactness_param = st.slider(
             "Compactness",
             min_value=0.1,
@@ -397,16 +396,14 @@ def render_segmentation(index):
             key=f"compactness_param_{index}",
         )
 
-    with col2:
-        segmentation_name = st.text_input("Segmentation Layer Name", "Base_Segmentation", key=f"seg_name_{index}")
-
-    st.subheader("Configure Band Mappings")
+    # st.subheader("Configure Band Mappings")
+    st.markdown("#### Configure Band Mappings")
     st.write("Set up mappings for spectral bands to use in indices and analysis")
 
     # Get raw bands from the image data
     raw_bands = [f"band_{i + 1}" for i in range(st.session_state.image_data.shape[0])]
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         st.session_state.band_mappings["blue"] = st.selectbox(
@@ -417,6 +414,7 @@ def render_segmentation(index):
             else 0,
             key=f"blue_band_{index}",
         )
+    with col2:
         st.session_state.band_mappings["green"] = st.selectbox(
             "Green band mapping",
             raw_bands,
@@ -427,7 +425,7 @@ def render_segmentation(index):
             else min(1, len(raw_bands) - 1),
             key=f"green_band_{index}",
         )
-    with col2:
+    with col3:
         st.session_state.band_mappings["red"] = st.selectbox(
             "Red band mapping",
             raw_bands,
@@ -438,6 +436,7 @@ def render_segmentation(index):
             else min(2, len(raw_bands) - 1),
             key=f"red_band_{index}",
         )
+    with col4:
         if len(raw_bands) > 3:
             st.session_state.band_mappings["nir"] = st.selectbox(
                 "NIR band mapping",
@@ -458,6 +457,9 @@ def render_segmentation(index):
     segmentation_button = st.button("Run Segmentation", key=f"run_seg_{index}")
 
     if segmentation_button:
+        if segmentation_name in list(st.session_state.layers.keys()):
+            st.error("Layer name already exists")
+            st.stop()
         segmentation_layer = perform_segmentation(
             st.session_state.image_data,
             st.session_state.transform,
@@ -476,6 +478,7 @@ def render_segmentation(index):
                 show_boundaries=True,
             )
             process_data["output_fig"] = fig
+            # process_data["layer_type"] = "segmentation"
         st.success(f"Segmentation '{segmentation_name}' completed successfully!")
 
     if "output_fig" in process_data:
@@ -486,7 +489,7 @@ def render_segmentation(index):
 def render_calculate_features(index):
     """Render the UI for calculating features based on selected segmentation layer and band attributes."""
     try:
-        st.subheader("Calculate Features")
+        st.markdown("#### Calculate Features")
 
         if not st.session_state.layers:
             st.warning("No segmentation layers available. Run segmentation first.")
@@ -496,7 +499,6 @@ def render_calculate_features(index):
                 options=list(st.session_state.layers.keys()),
                 key=f"feature_{index}",
             )
-
             if segmentation_for_features:
                 selected_layer = st.session_state.layers[segmentation_for_features]
 
@@ -514,7 +516,7 @@ def render_calculate_features(index):
                 )
 
                 if "NDVI" in feature_options:
-                    st.subheader("NDVI Configuration")
+                    st.markdown("#### NDVI Configuration")
                     col1, col2, col3 = st.columns(3)
 
                     with col1:
@@ -536,7 +538,7 @@ def render_calculate_features(index):
                             key=f"red_band2_{index}",
                         )
                     with col3:
-                        ndvi_output = st.text_input("Output column name:", "NDVI")
+                        ndvi_output = st.text_input("Output column name:", "NDVI", key=f"ndvi_output_{index}")
 
                 if st.button("Calculate Selected Features", key=f"calc_feat_{index}"):
                     features_calculated = False
@@ -661,6 +663,9 @@ def render_merge_regions(index):
             process_data["params"]["class_value"] = class_value
         execute_button = st.button("Execute", key=f"execute_merge_{index}")  # key=f"execute_merge_{index}
         if execute_button:
+            if layer_name in list(st.session_state.layers.keys()):
+                st.error("Layer name already exists")
+                st.stop()
             merged_layer = perform_merge_region(layer, class_column_name, class_value, layer_name)
             if merged_layer:
                 class_color = {}
@@ -669,6 +674,7 @@ def render_merge_regions(index):
 
                 fig = plot_classification(merged_layer, class_field="classification", class_color=class_color)
                 process_data["output_fig"] = fig
+                # process_data["layer_type"] = "classification"
 
         if "output_fig" in process_data:
             st.pyplot(process_data["output_fig"])
@@ -750,6 +756,9 @@ def render_enclosed_by_class(index):
 
         execute_button = st.button("Execute", key=f"execute_enclosed_by_{index}")  # key=f"execute_enclosed_by_{index}"
         if execute_button:
+            if layer_name in list(st.session_state.layers.keys()):
+                st.error("Layer name already exists")
+                st.stop()
             enclosed_by_layer = perform_enclosed_by(
                 layer,
                 class_column_name="classification",
@@ -765,6 +774,7 @@ def render_enclosed_by_class(index):
 
                 fig = plot_classification(enclosed_by_layer, class_field="classification", class_color=class_color)
                 process_data["output_fig"] = fig
+                # process_data["layer_type"] = "classification"
 
         if "output_fig" in process_data:
             st.pyplot(process_data["output_fig"])
@@ -846,6 +856,9 @@ def render_touched_by_class(index):
 
         execute_button = st.button("Execute", key=f"execute_touched_by_{index}")  # key=f"execute_touched_by_{index}"
         if execute_button:
+            if layer_name in list(st.session_state.layers.keys()):
+                st.error("Layer name already exists")
+                st.stop()
             touched_by_layer = perform_touched_by(
                 layer,
                 class_column_name="classification",
@@ -861,6 +874,7 @@ def render_touched_by_class(index):
 
                 fig = plot_classification(touched_by_layer, class_field="classification", class_color=class_color)
                 process_data["output_fig"] = fig
+                # process_data["layer_type"] = "classification"
 
         if "output_fig" in process_data:
             st.pyplot(process_data["output_fig"])
@@ -935,7 +949,7 @@ def render_select_samples(index):
                 class_name = class_names[edit_idx]
                 current_color = st.session_state.classes[class_name]["color"]
 
-                st.subheader("Edit Class")
+                st.markdown("#### Edit Class")
                 colb1, colb2 = st.columns([0.7, 0.3])
                 with colb1:
                     new_name = st.text_input("Class name", value=class_name, key="edit_name")
@@ -978,7 +992,7 @@ def render_select_samples(index):
             col2a, col2b = st.columns([0.5, 0.5])
             with col2a:
                 input_layer = st.selectbox(
-                    "Select input layer:", options=list(st.session_state.layers.keys()), key=f"select_box_{index}"
+                    "Select segmentation layer:", options=list(st.session_state.layers.keys()), key=f"select_box_{index}"
                 )
             st.session_state.active_segmentation_layer_name = input_layer
             layer = st.session_state.layers[input_layer]
@@ -1133,13 +1147,21 @@ def render_supervised_classification(index):
         st.markdown("### Configure Training Classifier")
 
         if "classes" in st.session_state and st.session_state.classes:
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             with col1:
+                layer_options = list(st.session_state.layers.keys())
+                seg_layer_name = st.selectbox(
+                    "Select segmentation layer for classification:",
+                    options=layer_options,
+                    index=layer_options.index(st.session_state.active_segmentation_layer_name),
+                    key=f"seg_layer_{index}",
+                )
+            with col2:
                 classifier_list = ["Random Forest"]
                 selected_classifier = st.selectbox(
                     "Choose a classifier", options=classifier_list, index=0, key=f"select_classifier_{index}"
                 )
-            with col2:
+            with col3:
                 classification_name = st.text_input("Layer Name", "Supervised_Classification", key=f"classification_name_{index}")
             col1a, col1b, col1c = st.columns(3)
             if selected_classifier == "Random Forest":
@@ -1157,10 +1179,14 @@ def render_supervised_classification(index):
             apply_button = st.button("Execute", key=f"execute_classification_{index}")
             if apply_button:
                 classifier_params = {"n_estimators": n_estimators, "oob_score": bool(oob_score), "random_state": random_state}
-                seg_layer_name = st.session_state.active_segmentation_layer_name
+                # seg_layer_name = st.session_state.active_segmentation_layer_name
 
                 layer = st.session_state.layers[seg_layer_name]
-                classification_layer = perform_supervised_classification(
+                if classification_name in list(st.session_state.layers.keys()):
+                    st.error("Layer name already exists")
+                    st.stop()
+
+                classification_layer, accuracy = perform_supervised_classification(
                     layer, selected_classifier, classifier_params, classification_name
                 )
 
@@ -1171,9 +1197,14 @@ def render_supervised_classification(index):
 
                     fig = plot_classification(classification_layer, class_field="classification", class_color=class_color)
                     process_data["output_fig"] = fig
+                    process_data["accuracy"] = accuracy
+                    # process_data["layer_type"] = "classification"
                     # st.session_state.classification_fig = fig  # Store the figure in session state
+            if "accuracy" in process_data:
+                st.write(f"OOB Score: {process_data['accuracy']}")
             if "output_fig" in process_data:
                 st.pyplot(process_data["output_fig"])
+            # st.write(st.session_state.layers)
 
             # if "classification_fig" in st.session_state:
             #     st.pyplot(st.session_state.classification_fig)
@@ -1186,7 +1217,7 @@ def render_supervised_classification(index):
 def render_rule_based_classification(index):
     """Render the rule based classification."""
     try:
-        st.subheader("Apply Rule Sets")
+        st.markdown("#### Apply Rule Sets")
 
         if not st.session_state.rule_sets:
             st.info("No rule sets defined yet. Go to Rule Builder tab to create rule sets.")
@@ -1207,13 +1238,18 @@ def render_rule_based_classification(index):
                 result_field = st.text_input("Result field name:", "classification", key=f"result_field_{index}")
 
             if selected_ruleset and input_layer:
-                output_layer_name = st.text_input(
-                    "Output layer name:", f"{selected_ruleset}_results", key=f"out_layer_name_{index}"
-                )
+                col1a, _ = st.columns([2, 3])
+                with col1a:
+                    output_layer_name = st.text_input(
+                        "Output layer name:", f"{selected_ruleset}_results", key=f"out_layer_name_{index}"
+                    )
 
                 if st.button("Apply Rule Set", key=f"apply_ruleset_{index}"):
                     ruleset = st.session_state.rule_sets[selected_ruleset]
                     input_layer_obj = st.session_state.layers[input_layer]
+                    if output_layer_name in list(st.session_state.layers.keys()):
+                        st.error("Output layer name already exists")
+                        st.stop()
                     result_layer = apply_rule_set(ruleset, input_layer_obj, output_layer_name, result_field)
 
                     if result_layer:
@@ -1223,7 +1259,7 @@ def render_rule_based_classification(index):
                         area_stats = calculate_area_stats(result_layer, result_field)
 
                         if area_stats:
-                            st.subheader("Area Statistics")
+                            st.markdown("#### Area Statistics")
                             stats_data = []
                             for class_name, area in area_stats.get("class_areas", {}).items():
                                 percentage = area_stats.get("class_percentages", {}).get(class_name, 0)
@@ -1235,7 +1271,7 @@ def render_rule_based_classification(index):
 
                         st.success(f"Rule set '{selected_ruleset}' applied successfully to create layer '{output_layer_name}'!")
 
-        st.subheader("Load Example Rule Sets")
+        st.markdown("#### Load Example Rule Sets")
 
         if st.button("Load Vegetation Classification Example", key=f"load_example_{index}"):
             has_ndvi = False
@@ -1262,7 +1298,7 @@ def render_rule_builder(index):
         st.header("Rule Builder")
         st.write("Create and manage classification rule sets and rules")
 
-        st.subheader("Create Rule Set")
+        st.markdown("#### Create Rule Set")
 
         new_ruleset_name = st.text_input("New Rule Set Name:", "", key=f"ruleset_name_{index}")
         if new_ruleset_name and st.button("Create New Rule Set"):
@@ -1274,7 +1310,7 @@ def render_rule_builder(index):
                     st.session_state.active_ruleset = new_ruleset_name
                     st.success(f"Rule set '{new_ruleset_name}' created successfully!")
 
-        st.subheader("Manage Rules")
+        st.markdown("#### Manage Rules")
 
         if not st.session_state.rule_sets:
             st.info("No rule sets created yet. Create a rule set first.")
@@ -1299,7 +1335,7 @@ def render_rule_builder(index):
 
                     st.table(pd.DataFrame(rule_data))
 
-                st.subheader("Add New Rule")
+                st.markdown("#### Add New Rule")
 
                 if not st.session_state.available_attributes:
                     st.warning("No layers with attributes available. Create a segmentation layer with features first.")
@@ -1312,7 +1348,7 @@ def render_rule_builder(index):
                     with col1:
                         rule_name = st.text_input("Rule Name:", "", key=f"rule_name_{index}")
 
-                    st.subheader("Rule Condition Builder")
+                    st.markdown("#### Rule Condition Builder")
 
                     if "condition_builder" not in st.session_state:
                         st.session_state.condition_builder = []
@@ -1323,7 +1359,7 @@ def render_rule_builder(index):
                     condition_parts = []
 
                     for i, _condition in enumerate(st.session_state.condition_builder):
-                        st.subheader(f"Condition Component {i + 1}")
+                        st.markdown("#### Condition Component {i + 1}")
                         col1, col2, col3 = st.columns(3)
 
                         with col1:
@@ -1359,7 +1395,7 @@ def render_rule_builder(index):
                             if i < len(condition_parts) - 1:
                                 final_condition += f" {st.session_state.condition_builder[i]['connector']} "
 
-                        st.subheader("Final Condition:")
+                        st.markdown("#### Final Condition:")
                         st.code(final_condition)
 
                         manual_condition = st.text_area("Or manually edit condition:", final_condition)
@@ -1378,7 +1414,7 @@ def render_rule_builder(index):
                         st.session_state.condition_builder = []
                         st.rerun()
 
-                st.subheader("Delete Rule Set")
+                st.markdown("#### Delete Rule Set")
                 if st.button("Delete Current Rule Set", key=f"delete_ruleset_{index}"):
                     with st.spinner("Deleting rule set..."):
                         if st.session_state.active_ruleset in st.session_state.rule_sets:
@@ -1472,6 +1508,8 @@ def render_process_tab():
         #         }
         #     )
 
+        # st.write(st.session_state.processes)
+
         if st.session_state.delete_index is not None:
             del st.session_state.processes[st.session_state.delete_index]
             st.session_state.delete_index = None
@@ -1485,7 +1523,7 @@ def render_layer_manager_tab():
     st.header("Layer Manager")
     st.write("View, inspect, and manage layers")
 
-    st.subheader("Available Layers")
+    st.markdown("#### Available Layers")
 
     if not st.session_state.layers:
         st.info("No layers created yet.")
@@ -1557,11 +1595,11 @@ def render_results_tab():
     else:
         st.write("Export your results as vector (GeoJSON) or raster (GeoTIFF) files.")
 
-        st.subheader("Available Layers")
+        st.markdown("#### Available Layers")
         for i, layer_name in enumerate(st.session_state.manager.get_layer_names()):
             st.write(f"  {i + 1}. {layer_name}")
 
-        st.subheader("Export Options")
+        st.markdown("#### Export Options")
 
         export_layer_name = st.selectbox(
             "Select Layer to Export",
@@ -1601,7 +1639,7 @@ def render_results_tab():
                                     label="Download GeoTIFF", data=f, file_name=f"{export_path}.tif", mime="image/tiff"
                                 )
 
-            st.subheader("Project Export")
+            st.markdown("#### Project Export")
 
             if st.button("Export Project Metadata"):
                 with st.spinner("Creating project metadata..."):

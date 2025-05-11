@@ -315,7 +315,9 @@ def plot_classification(layer, class_field="classification", figsize=(12, 10), l
         patches = [mpatches.Patch(color=class_color[value], label=value) for value in class_values]
         ax.legend(handles=patches, loc="upper right", title=class_field)
 
-    ax.set_title(f"Classification by {class_field}")
+    # ax.set_title(f"Classification by {class_field}")
+    ax.set_title("Classification Map")
+
     ax.set_xlabel("X Coordinate")
     ax.set_ylabel("Y Coordinate")
 
