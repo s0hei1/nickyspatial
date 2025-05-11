@@ -6,7 +6,7 @@ An open-source object-based image analysis library for remote sensing.
 |----------|-------|
 | **Build** | [![uv](https://img.shields.io/badge/build-uv-blue?logo=uv&logoColor=white)](https://pypi.org/project/uv/) [![hatchling](https://img.shields.io/badge/build-hatchling-blue?logo=hatchling&logoColor=white)](https://github.com/pypa/hatchling)  [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/kshitijrajsharma/nickyspatial/master.svg)](https://results.pre-commit.ci/latest/github/kshitijrajsharma/nickyspatial/master)  |
 | **Code Quality** | [![Ruff](https://img.shields.io/badge/ruff-v0.11.3-blue?logo=ruff&logoColor=white)](https://beta.ruff.rs/) [![pre-commit](https://img.shields.io/badge/pre--commit-active-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com) ![Tests](https://img.shields.io/badge/tests-passing-brightgreen) ![Coverage](https://img.shields.io/badge/Coverage-90%25-brightgreen) |
-| **Documentation** | [![MkDocs](https://img.shields.io/badge/MkDocs-Documentation-blue?logo=mkdocs&logoColor=white)](https://kshitijrajsharma.github.io/nickyspatial/) |
+| **Documentation** | [![MkDocs](https://img.shields.io/badge/MkDocs-Documentation-blue?logo=mkdocs&logoColor=white)](https://kshitijrajsharma.github.io/nickyspatial/) [![Read DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kshitijrajsharma/nickyspatial) |
 | **Package Info** | ![Python](https://img.shields.io/badge/Python-3.10%2B-blue) [![PyPI version](https://img.shields.io/pypi/v/nickyspatial.svg)](https://pypi.org/project/nickyspatial) ![Dependencies](https://img.shields.io/librariesio/github/kshitijrajsharma/nickyspatial) ![License](https://img.shields.io/badge/License-MIT-yellow.svg) |
 | **Community** | ![GitHub Stars](https://img.shields.io/github/stars/kshitijrajsharma/nickyspatial?style=social) ![Issues](https://img.shields.io/github/issues/kshitijrajsharma/nickyspatial) ![Downloads](https://img.shields.io/pypi/dm/nickyspatial.svg) ![Last Commit](https://img.shields.io/github/last-commit/kshitijrajsharma/nickyspatial) |
 
@@ -65,7 +65,8 @@ import nickyspatial as ns
 
 ## Documentation
 
-For detailed documentation and examples, see the [documentation website](#).
+For detailed documentation and examples, see the [documentation website](https://kshitijrajsharma.github.io/nickyspatial/).
+Deepwiki also provides documentation quite detailed , Do check it [out](https://deepwiki.com/kshitijrajsharma/nickyspatial ) if you like
 
 ## Examples
 
@@ -81,8 +82,12 @@ Contributions are welcome! Follow [dev setup guide](./docs/dev.md) & Please feel
 
 - Inspired by the functionality of eCognition and other OBIA methodologies
 - Built on top of powerful open-source libraries like numpy, rasterio, scikit-image, and GeoPandas
+- **Nicky**  : Nicky is my belated dog and I named this package in his memory!
+    <p align="left">
+      <img src="https://github.com/user-attachments/assets/b5b86c63-ae5a-48b4-9d45-3bb34a58a102" alt="Nicky the dog" width="160" style="border-radius: 80px;" />
+    </p>
 
-### Nicky
-**Nicky** is my belated dog and I named this package on his memory !
 
-![image](https://github.com/user-attachments/assets/b5b86c63-ae5a-48b4-9d45-3bb34a58a102)
+## Contributors
+
+[![Contributors](https://contrib.rocks/image?repo=kshitijrajsharma/nickyspatial)](https://github.com/kshitijrajsharma/nickyspatial/graphs/contributors)

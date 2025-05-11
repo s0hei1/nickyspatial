@@ -51,3 +51,9 @@ Once you have UV installed, dependencies synced, and pre-commit hooks set, you�
 - **Run your tests** – our project uses Pytest for testing.
 - **Commit your changes** – pre-commit hooks ensure that your code meets our quality standards and that your commit messages follow the Conventional Commits guidelines.
 - **Submit your PR** - Create a branch with suitable name as per as your changes and raise PR
+
+#### Bring up frontend
+
+```bash
+streamlit run streamlit.py
+```
