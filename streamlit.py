@@ -961,13 +961,25 @@ def render_select_samples(index):
                         st.session_state.edit_index = None
 
         with col2:
+            st.markdown(
+                """
+                <style>
+                    .element-container iframe {
+                        width: 100% !important;
+                    }
+                </style>
+                """,
+                unsafe_allow_html=True,
+            )
+
             st.markdown("### Click Segments on Interactive Map")
 
             # Select the input layer
-
-            input_layer = st.selectbox(
-                "Select input layer:", options=list(st.session_state.layers.keys()), key=f"select_box_{index}"
-            )
+            col2a, col2b = st.columns([0.5, 0.5])
+            with col2a:
+                input_layer = st.selectbox(
+                    "Select input layer:", options=list(st.session_state.layers.keys()), key=f"select_box_{index}"
+                )
             st.session_state.active_segmentation_layer_name = input_layer
             layer = st.session_state.layers[input_layer]
             segments = layer.raster
@@ -975,13 +987,50 @@ def render_select_samples(index):
             crs = layer.crs
 
             image_data = st.session_state.image_data
-            rgb_bands = (3, 2, 1)  # Adjust as needed
+
+            # rgb_bands = (3, 2, 1)  # Adjust as needed
 
             # Create RGB base image (grayscale fallback)
             if image_data.shape[0] >= 3:
-                r = image_data[rgb_bands[0]]
-                g = image_data[rgb_bands[1]]
-                b = image_data[rgb_bands[2]]
+                # Get raw bands from the image data
+                raw_bands = [f"band_{i + 1}" for i in range(image_data.shape[0])]
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    red_band_index = st.selectbox(
+                        "Red band",
+                        raw_bands,
+                        index=0,
+                        key=f"red_map_{index}",
+                    )
+
+                with col2:
+                    green_band_index = st.selectbox(
+                        "Green band",
+                        raw_bands,
+                        index=1,
+                        key=f"green_map_{index}",
+                    )
+                with col3:
+                    blue_band_index = st.selectbox(
+                        "Blue band",
+                        raw_bands,
+                        index=2,
+                        key=f"blue_map_{index}",
+                    )
+                col11, col12, _ = st.columns(3)
+                with col11:
+                    show_boundaries = st.checkbox("Show segment boundaries", value=True)
+                with col12:
+                    show_samples = st.checkbox("Show samples", value=True)
+
+                r_index = raw_bands.index(red_band_index)
+                g_index = raw_bands.index(green_band_index)
+                b_index = raw_bands.index(blue_band_index)
+                r = image_data[r_index]
+                g = image_data[g_index]
+                b = image_data[b_index]
 
                 r_norm = np.clip((r - r.min()) / (r.max() - r.min() + 1e-10), 0, 1)
                 g_norm = np.clip((g - g.min()) / (g.max() - g.min() + 1e-10), 0, 1)
@@ -1008,9 +1057,18 @@ def render_select_samples(index):
                     for c in range(3):  # RGB channels
                         segment_colored_img[:, :, c][mask] = color_rgb[c]
 
-            # Overlay segment boundaries
-            overlay = mark_boundaries(segment_colored_img / 255, segments, color=(1, 1, 0), mode="thick")
-            overlay_uint8 = (overlay * 255).astype(np.uint8)
+            if show_boundaries:
+                if show_samples:
+                    final_img = segment_colored_img
+                else:
+                    final_img = base_img
+                overlay_img = mark_boundaries(final_img, segments, color=(1, 1, 0), mode="thick")
+                overlay_uint8 = (overlay_img * 255).astype(np.uint8)
+            else:
+                if show_samples:
+                    overlay_uint8 = segment_colored_img
+                else:
+                    overlay_uint8 = (base_img * 255).astype(np.uint8)
 
             # Save overlay to a temporary file
             tmp_path = NamedTemporaryFile(suffix=".png", delete=False).name
@@ -1029,38 +1087,38 @@ def render_select_samples(index):
             center_lat = (top_left_latlon[1] + bottom_right_latlon[1]) / 2
             center_lon = (top_left_latlon[0] + bottom_right_latlon[0]) / 2
             fmap = folium.Map(location=[center_lat, center_lon], zoom_start=15)
+
             ImageOverlay(
                 name="Colored Segments", image=tmp_path, bounds=bounds, opacity=0.8, interactive=True, cross_origin=False
             ).add_to(fmap)
             folium.LayerControl().add_to(fmap)
-            # st.write(f"Index used for selcndmnecnkntbox: {index}")
 
             # Display the map and handle click events
-            click_info = st_folium(fmap, height=600, width=700, key=f"map_folium_{index}")
-            # st.write(f"Index used for selcndmnecnkntbox: {index}")
+            click_info = st_folium(fmap, height=600, width=1000, key=f"map_folium_{index}")
 
-            # Process click events
-            if click_info and click_info.get("last_clicked"):
-                lat = click_info["last_clicked"]["lat"]
-                lon = click_info["last_clicked"]["lng"]
-                x, y = Transformer.from_crs("EPSG:4326", crs, always_xy=True).transform(lon, lat)
-                col, row = ~transform * (x, y)
-                col, row = int(col), int(row)
-                if 0 <= row < segments.shape[0] and 0 <= col < segments.shape[1]:
-                    seg_id = int(segments[row, col])
-                    found = False
-                    for _class_name, class_data in st.session_state.classes.items():
-                        if seg_id in class_data["sample_ids"]:
-                            found = True
-                            break
-                    if found and seg_id in st.session_state.classes[selected_class]["sample_ids"]:
-                        st.session_state.classes[selected_class]["sample_ids"].remove(seg_id)
-                        st.success(f"Segment ID: {seg_id} at ({col}, {row}) removed from {selected_class}.")
-                    elif not found and seg_id not in st.session_state.classes[selected_class]["sample_ids"]:
-                        st.session_state.classes[selected_class]["sample_ids"].append(seg_id)
-                        st.success(f"Segment ID: {seg_id} at ({col}, {row}) added to {selected_class}.")
-                    st.write(st.session_state.classes)
-                    st.rerun()
+            if show_boundaries:
+                # Process click events
+                if click_info and click_info.get("last_clicked"):
+                    lat = click_info["last_clicked"]["lat"]
+                    lon = click_info["last_clicked"]["lng"]
+                    x, y = Transformer.from_crs("EPSG:4326", crs, always_xy=True).transform(lon, lat)
+                    col, row = ~transform * (x, y)
+                    col, row = int(col), int(row)
+                    if 0 <= row < segments.shape[0] and 0 <= col < segments.shape[1]:
+                        seg_id = int(segments[row, col])
+                        found = False
+                        for _class_name, class_data in st.session_state.classes.items():
+                            if seg_id in class_data["sample_ids"]:
+                                found = True
+                                break
+                        if found and seg_id in st.session_state.classes[selected_class]["sample_ids"]:
+                            st.session_state.classes[selected_class]["sample_ids"].remove(seg_id)
+                            st.success(f"Segment ID: {seg_id} at ({col}, {row}) removed from {selected_class}.")
+                        elif not found and seg_id not in st.session_state.classes[selected_class]["sample_ids"]:
+                            st.session_state.classes[selected_class]["sample_ids"].append(seg_id)
+                            st.success(f"Segment ID: {seg_id} at ({col}, {row}) added to {selected_class}.")
+                        st.write(st.session_state.classes)
+                        st.rerun()
     except Exception as e:
         st.error(f"error: {str(e)}")
 
