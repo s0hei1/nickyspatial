@@ -361,6 +361,7 @@ def render_segmentation(index):
             value=40,
             step=5,
             help="Controls the size of segments. Higher values create larger segments.",
+            key=f"scale_param_{index}",
         )
 
         compactness_param = st.slider(
@@ -370,10 +371,11 @@ def render_segmentation(index):
             value=1.0,
             step=0.1,
             help="Controls the compactness of segments. Higher values create more compact segments.",
+            key=f"compactness_param_{index}",
         )
 
     with col2:
-        segmentation_name = st.text_input("Segmentation Layer Name", "Base_Segmentation")
+        segmentation_name = st.text_input("Segmentation Layer Name", "Base_Segmentation", key=f"seg_name_{index}")
 
     st.subheader("Configure Band Mappings")
     st.write("Set up mappings for spectral bands to use in indices and analysis")
@@ -390,6 +392,7 @@ def render_segmentation(index):
             index=raw_bands.index(st.session_state.band_mappings.get("blue", raw_bands[0]).replace("_mean", ""))
             if "blue" in st.session_state.band_mappings
             else 0,
+            key=f"blue_band_{index}",
         )
         st.session_state.band_mappings["green"] = st.selectbox(
             "Green band mapping",
@@ -399,6 +402,7 @@ def render_segmentation(index):
             )
             if "green" in st.session_state.band_mappings
             else min(1, len(raw_bands) - 1),
+            key=f"green_band_{index}",
         )
     with col2:
         st.session_state.band_mappings["red"] = st.selectbox(
@@ -409,6 +413,7 @@ def render_segmentation(index):
             )
             if "red" in st.session_state.band_mappings
             else min(2, len(raw_bands) - 1),
+            key=f"red_band_{index}",
         )
         if len(raw_bands) > 3:
             st.session_state.band_mappings["nir"] = st.selectbox(
@@ -419,6 +424,7 @@ def render_segmentation(index):
                 )
                 if "nir" in st.session_state.band_mappings
                 else min(3, len(raw_bands) - 1),
+                key=f"nir_band_{index}",
             )
             # process_data["params"]["segmentation_name"] = segmentation_name
 
@@ -426,7 +432,7 @@ def render_segmentation(index):
         if not st.session_state.band_mappings[key].endswith("_mean"):
             st.session_state.band_mappings[key] = f"{st.session_state.band_mappings[key]}_mean"
 
-    segmentation_button = st.button("Run Segmentation")
+    segmentation_button = st.button("Run Segmentation", key=f"run_seg_{index}")
 
     if segmentation_button:
         segmentation_layer = perform_segmentation(
@@ -463,7 +469,9 @@ def render_calculate_features(index):
             st.warning("No segmentation layers available. Run segmentation first.")
         else:
             segmentation_for_features = st.selectbox(
-                "Select segmentation layer for feature calculation:", options=list(st.session_state.layers.keys())
+                "Select segmentation layer for feature calculation:",
+                options=list(st.session_state.layers.keys()),
+                key=f"feature_{index}",
             )
 
             if segmentation_for_features:
@@ -476,7 +484,10 @@ def render_calculate_features(index):
                 band_attributes = [attr for attr in layer_attributes if attr.startswith("band_") and attr.endswith("_mean")]
 
                 feature_options = st.multiselect(
-                    "Select features to calculate:", ["NDVI", "Spectral Indices", "Shape Metrics"], default=[]
+                    "Select features to calculate:",
+                    ["NDVI", "Spectral Indices", "Shape Metrics"],
+                    default=[],
+                    key=f"feat_options_{index}",
                 )
 
                 if "NDVI" in feature_options:
@@ -490,6 +501,7 @@ def render_calculate_features(index):
                             index=band_attributes.index(st.session_state.band_mappings.get("nir", "band_4_mean"))
                             if "nir" in st.session_state.band_mappings and st.session_state.band_mappings["nir"] in band_attributes
                             else 0,
+                            key=f"nir_band1_{index}",
                         )
                     with col2:
                         red_column = st.selectbox(
@@ -498,11 +510,12 @@ def render_calculate_features(index):
                             index=band_attributes.index(st.session_state.band_mappings.get("red", "band_3_mean"))
                             if "red" in st.session_state.band_mappings and st.session_state.band_mappings["red"] in band_attributes
                             else 0,
+                            key=f"red_band2_{index}",
                         )
                     with col3:
                         ndvi_output = st.text_input("Output column name:", "NDVI")
 
-                if st.button("Calculate Selected Features"):
+                if st.button("Calculate Selected Features", key=f"calc_feat_{index}"):
                     features_calculated = False
 
                     if "NDVI" in feature_options:
@@ -589,6 +602,11 @@ def render_merge_regions(index):
             process_data["params"]["input_layer"] = input_layer
             layer = st.session_state.layers[input_layer]
             layer_objects = layer.objects
+            try:
+                value_option_list = list(layer_objects["classification"].unique())
+            except Exception:
+                st.error("Layer is invalid")
+                st.stop()
 
             attr_option_list = list(layer_objects.columns)
             class_column_name = st.selectbox(
@@ -657,8 +675,8 @@ def render_enclosed_by_class(index):
             layer_objects = layer.objects
             try:
                 value_option_list = list(layer_objects["classification"].unique())
-            except Exception as e:
-                st.error(f"Layer is invalid: {str(e)}")
+            except Exception:
+                st.error("Layer is invalid")
                 st.stop()
         with col2:
             layer_name = st.text_input(
@@ -968,7 +986,7 @@ def render_supervised_classification(index):
                 classification_layer = perform_supervised_classification(
                     layer, selected_classifier, classifier_params, classification_name
                 )
-                st.write("hhdvcdvchdvh")
+
                 if classification_layer:
                     class_color = {}
                     for key in list(st.session_state.classes.keys()):
@@ -999,18 +1017,24 @@ def render_rule_based_classification(index):
             col1, col2, col3 = st.columns([2, 2, 1])
 
             with col1:
-                selected_ruleset = st.selectbox("Select rule set to apply:", options=list(st.session_state.rule_sets.keys()))
+                selected_ruleset = st.selectbox(
+                    "Select rule set to apply:", options=list(st.session_state.rule_sets.keys()), key=f"select_ruleset_{index}"
+                )
 
             with col2:
-                input_layer = st.selectbox("Select input layer:", options=list(st.session_state.layers.keys()))
+                input_layer = st.selectbox(
+                    "Select input layer:", options=list(st.session_state.layers.keys()), key=f"input_layer_{index}"
+                )
 
             with col3:
-                result_field = st.text_input("Result field name:", "classification")
+                result_field = st.text_input("Result field name:", "classification", key=f"result_field_{index}")
 
             if selected_ruleset and input_layer:
-                output_layer_name = st.text_input("Output layer name:", f"{selected_ruleset}_results")
+                output_layer_name = st.text_input(
+                    "Output layer name:", f"{selected_ruleset}_results", key=f"out_layer_name_{index}"
+                )
 
-                if st.button("Apply Rule Set"):
+                if st.button("Apply Rule Set", key=f"apply_ruleset_{index}"):
                     ruleset = st.session_state.rule_sets[selected_ruleset]
                     input_layer_obj = st.session_state.layers[input_layer]
                     result_layer = apply_rule_set(ruleset, input_layer_obj, output_layer_name, result_field)
@@ -1036,7 +1060,7 @@ def render_rule_based_classification(index):
 
         st.subheader("Load Example Rule Sets")
 
-        if st.button("Load Vegetation Classification Example"):
+        if st.button("Load Vegetation Classification Example", key=f"load_example_{index}"):
             has_ndvi = False
             for _layer_name, layer in st.session_state.layers.items():
                 if "NDVI" in layer.objects.columns:
@@ -1063,7 +1087,7 @@ def render_rule_builder(index):
 
         st.subheader("Create Rule Set")
 
-        new_ruleset_name = st.text_input("New Rule Set Name:", "")
+        new_ruleset_name = st.text_input("New Rule Set Name:", "", key=f"ruleset_name_{index}")
         if new_ruleset_name and st.button("Create New Rule Set"):
             if new_ruleset_name in st.session_state.rule_sets:
                 st.warning(f"Rule set '{new_ruleset_name}' already exists.")
@@ -1078,7 +1102,9 @@ def render_rule_builder(index):
         if not st.session_state.rule_sets:
             st.info("No rule sets created yet. Create a rule set first.")
         else:
-            ruleset_selection = st.selectbox("Select rule set to manage:", options=list(st.session_state.rule_sets.keys()))
+            ruleset_selection = st.selectbox(
+                "Select rule set to manage:", options=list(st.session_state.rule_sets.keys()), key=f"ruleset_select_{index}"
+            )
 
             if ruleset_selection:
                 st.session_state.active_ruleset = ruleset_selection
@@ -1107,14 +1133,14 @@ def render_rule_builder(index):
                     col1, col2 = st.columns(2)
 
                     with col1:
-                        rule_name = st.text_input("Rule Name:", "")
+                        rule_name = st.text_input("Rule Name:", "", key=f"rule_name_{index}")
 
                     st.subheader("Rule Condition Builder")
 
                     if "condition_builder" not in st.session_state:
                         st.session_state.condition_builder = []
 
-                    if st.button("Add Condition Component"):
+                    if st.button("Add Condition Component", key=f"rule_add_{index}"):
                         st.session_state.condition_builder.append({"attribute": "", "operator": ">", "value": "", "connector": "&"})
 
                     condition_parts = []
@@ -1125,26 +1151,28 @@ def render_rule_builder(index):
 
                         with col1:
                             attribute = st.selectbox(
-                                f"Attribute {i + 1}", options=sorted(st.session_state.available_attributes), key=f"attr_{i}"
+                                f"Attribute {i + 1}", options=sorted(st.session_state.available_attributes), key=f"attr_{index}_{i}"
                             )
                             st.session_state.condition_builder[i]["attribute"] = attribute
 
                         with col2:
-                            operator = st.selectbox(f"Operator {i + 1}", options=[">", ">=", "<", "<=", "==", "!="], key=f"op_{i}")
+                            operator = st.selectbox(
+                                f"Operator {i + 1}", options=[">", ">=", "<", "<=", "==", "!="], key=f"op_{index}_{i}"
+                            )
                             st.session_state.condition_builder[i]["operator"] = operator
 
                         with col3:
                             if operator == "==" or operator == "!=":
-                                value = st.text_input(f"Value {i + 1} (use quotes for text)", key=f"val_{i}")
+                                value = st.text_input(f"Value {i + 1} (use quotes for text)", key=f"val_{index}_{i}")
                             else:
-                                value = st.number_input(f"Value {i + 1}", key=f"val_{i}", format="%.2f")
+                                value = st.number_input(f"Value {i + 1}", key=f"val_{index}_{i}", format="%.2f")
                             st.session_state.condition_builder[i]["value"] = value
 
                         condition_part = f"{attribute} {operator} {value}"
                         condition_parts.append(condition_part)
 
                         if i < len(st.session_state.condition_builder) - 1:
-                            connector = st.selectbox("Connect with", options=["&", "|"], key=f"conn_{i}")
+                            connector = st.selectbox("Connect with", options=["&", "|"], key=f"conn_{index}_{i}")
                             st.session_state.condition_builder[i]["connector"] = connector
 
                     if condition_parts:
@@ -1159,7 +1187,7 @@ def render_rule_builder(index):
 
                         manual_condition = st.text_area("Or manually edit condition:", final_condition)
 
-                        if manual_condition and st.button("Add Rule to Set"):
+                        if manual_condition and st.button("Add Rule to Set", key=f"rule_apply_{index}"):
                             if not rule_name:
                                 st.warning("Rule Name is required.")
                             else:
@@ -1169,12 +1197,12 @@ def render_rule_builder(index):
                                     st.success(f"Rule '{rule_name}' added to rule set '{ruleset_selection}'!")
                                     st.rerun()
 
-                    if st.button("Clear Condition Builder"):
+                    if st.button("Clear Condition Builder", key=f"rule_clear_{index}"):
                         st.session_state.condition_builder = []
                         st.rerun()
 
                 st.subheader("Delete Rule Set")
-                if st.button("Delete Current Rule Set", key="delete_ruleset"):
+                if st.button("Delete Current Rule Set", key=f"delete_ruleset_{index}"):
                     with st.spinner("Deleting rule set..."):
                         if st.session_state.active_ruleset in st.session_state.rule_sets:
                             del st.session_state.rule_sets[st.session_state.active_ruleset]
@@ -1205,6 +1233,17 @@ def render_process_tab():
         if "expanders" not in st.session_state:
             st.session_state.expanders = {}
 
+        add_process_button = st.button("➕ Add process", key="add_process")
+        if "processes" not in st.session_state:
+            st.session_state.processes = []
+        if add_process_button:
+            st.session_state.processes.append(
+                {
+                    "id": len(st.session_state.processes),
+                    "type": "",  # Default process type
+                }
+            )
+
         for i, process in enumerate(st.session_state.processes):
             key = f"expander_{i}"
             # Default: True (expanded) if not already tracked
@@ -1212,12 +1251,14 @@ def render_process_tab():
                 st.session_state.expanders[key] = True
 
             with st.expander(f"Process {i + 1}: {process['type']}", expanded=st.session_state.expanders[key]):
-                selected_operation = st.selectbox(
-                    "Select  Operation",
-                    operation_list,
-                    index=operation_list.index(process["type"]) if process["type"] in operation_list else 0,
-                    key=f"operation_{i}",
-                )
+                col1, col2 = st.columns(2)
+                with col1:
+                    selected_operation = st.selectbox(
+                        "Select  Operation",
+                        operation_list,
+                        index=operation_list.index(process["type"]) if process["type"] in operation_list else 0,
+                        key=f"operation_{i}",
+                    )
                 st.session_state.processes[i]["type"] = selected_operation
                 if selected_operation == "Segmentation":
                     render_segmentation(i)
@@ -1240,14 +1281,16 @@ def render_process_tab():
                 st.session_state.delete_index = i
                 st.rerun()
 
-        add_process_button = st.button("➕ Add process", key="add_process")
-        if add_process_button:
-            st.session_state.processes.append(
-                {
-                    "id": len(st.session_state.processes),
-                    "type": "",  # Default process type
-                }
-            )
+        # add_process_button = st.button("➕ Add process", key="add_process")
+        # if "processes" not in st.session_state:
+        #     st.session_state.processes = []
+        # if add_process_button:
+        #     st.session_state.processes.append(
+        #         {
+        #             "id": len(st.session_state.processes),
+        #             "type": "",  # Default process type
+        #         }
+        #     )
 
         if st.session_state.delete_index is not None:
             del st.session_state.processes[st.session_state.delete_index]
