@@ -65,7 +65,7 @@ import nickyspatial as ns
 
 ## Documentation
 
-For detailed documentation and examples, see the [documentation website](https://kshitijrajsharma.github.io/nickyspatial/). 
+For detailed documentation and examples, see the [documentation website](https://kshitijrajsharma.github.io/nickyspatial/).
 Deepwiki also provides documentation quite detailed , Do check it [out](https://deepwiki.com/kshitijrajsharma/nickyspatial ) if you like
 
 ## Examples
