@@ -89,7 +89,7 @@ def plot_layer(
     return fig
 
 
-def plot_layer_interactive(layer, image_data=None):
+def plot_layer_interactive(layer, image_data=None,figsize=(10,8)):
     """Interactive plot of a layer with widgets and working click."""
     # attribute_options = [None] + list(layer.objects.columns)
     # attribute_widget = widgets.Dropdown(
@@ -118,7 +118,7 @@ def plot_layer_interactive(layer, image_data=None):
     #     description='Red Band:'
     # )
 
-    rgb_band_max = image_data.shape[0] - 1 if image_data is not None else 2
+    # rgb_band_max = image_data.shape[0] - 1 if image_data is not None else 2
     red_band_widget = widgets.Select(
         options=list(range(rgb_band_max + 1)), value=0 if rgb_band_max >= 2 else 0, description="Red Band:"
     )
@@ -132,7 +132,7 @@ def plot_layer_interactive(layer, image_data=None):
     show_boundaries_widget = widgets.Checkbox(value=True, description="Show Boundaries")
 
     # Create a figure and output widget
-    fig, ax = plt.subplots(figsize=(12, 10))
+    fig, ax = plt.subplots(figsize=figsize)
     out_fig = widgets.Output()
 
     # with out_fig:
@@ -263,7 +263,11 @@ def plot_layer_interactive(layer, image_data=None):
     display(ui, out_fig, controls)
 
 
-def plot_classification(layer, class_field="classification", figsize=(12, 10), legend=True, class_color=None):
+def plot_classification(layer, 
+                        class_field="classification", 
+                        figsize=(12, 10), 
+                        legend=True, 
+                        class_color=None):
     """Plot classified segments with different colors for each class."""
     fig, ax = plt.subplots(figsize=figsize)
     if not class_color:
@@ -402,3 +406,90 @@ def plot_comparison(
         after_layer.objects = after_layer.objects.drop(columns=["_class_id"])
 
     return fig
+
+def plot_sample(
+    layer,
+    image_data=None,
+    transform=None,
+    rgb_bands=None,
+    class_field="classification",
+    figsize=(8, 6),
+    class_color=None,
+    legend=True
+):
+    """
+    Plot classified segments on top of RGB or grayscale image data.
+
+    Parameters:
+    - layer: Layer object with .objects (GeoDataFrame)
+    - image_data: 3D numpy array (bands, height, width)
+    - transform: Affine transform for the image (needed to compute extent)
+    - red_band, green_band, blue_band: indices for RGB bands
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+
+    # ---- Plot RGB or Grayscale image from array ----
+    if image_data is not None:
+        num_bands = image_data.shape[0]
+        if rgb_bands and num_bands >= 3:
+            r = image_data[rgb_bands[0]].astype(float)
+            g = image_data[rgb_bands[1]].astype(float)
+            b = image_data[rgb_bands[2]].astype(float)
+
+            r_norm = np.clip((r - r.min()) / (r.max() - r.min() + 1e-10), 0, 1)
+            g_norm = np.clip((g - g.min()) / (g.max() - g.min() + 1e-10), 0, 1)
+            b_norm = np.clip((b - b.min()) / (b.max() - b.min() + 1e-10), 0, 1)
+
+            rgb = np.stack([r_norm, g_norm, b_norm], axis=2)
+            if transform:
+                from rasterio.plot import plotting_extent
+                extent = plotting_extent(image_data[0], transform=transform)
+                ax.imshow(rgb, extent=extent)
+            else:
+                ax.imshow(rgb)
+        else:
+            gray = image_data[0]
+            gray_norm = (gray - gray.min()) / (gray.max() - gray.min() + 1e-10)
+            if transform:
+                from rasterio.plot import plotting_extent
+                extent = plotting_extent(gray, transform=transform)
+                ax.imshow(gray_norm, cmap="gray", extent=extent)
+            else:
+                ax.imshow(gray_norm, cmap="gray")
+
+    # ---- Plot classification overlay ----
+    gdf = layer.objects.copy()
+    if gdf.crs is None:
+        raise ValueError("GeoDataFrame has no CRS")
+    
+    if not class_color:
+        class_color = {}
+    if class_field not in gdf.columns:
+        raise ValueError(f"Class field '{class_field}' not found")
+
+    class_values = [v for v in gdf[class_field].unique() if v is not None]
+    base_colors = plt.cm.tab20(np.linspace(0, 1, max(len(class_values), 1)))
+    class_map = {}
+
+    for idx, class_value in enumerate(class_values):
+        if class_value in class_color:
+            color_hex = class_color[class_value]
+        else:
+            rgb_val = base_colors[idx % len(base_colors)][:3]
+            color_hex = "#{:02x}{:02x}{:02x}".format(int(rgb_val[0]*255), int(rgb_val[1]*255), int(rgb_val[2]*255))
+            class_color[class_value] = color_hex
+        class_map[class_value] = color_hex
+
+    for class_value in class_values:
+        gdf[gdf[class_field] == class_value].plot(
+            ax=ax, facecolor=class_map[class_value], edgecolor='black', linewidth=0.5
+        )
+
+    if legend:
+        handles = [mpatches.Patch(color=class_map[val], label=val) for val in class_values]
+        ax.legend(handles=handles, loc="upper right", title=class_field)
+
+    ax.set_title("Classification on RGB Image")
+    ax.set_axis_off()
+    return fig
+
