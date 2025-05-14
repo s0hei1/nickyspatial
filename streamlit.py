@@ -10,6 +10,7 @@ import tempfile
 from tempfile import NamedTemporaryFile
 
 import folium
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import rasterio
@@ -159,7 +160,7 @@ def perform_segmentation(image_data, transform, crs, scale_param, compactness_pa
         return None
 
 
-def perform_supervised_classification(layer, selected_classifier, classifier_params, classification_name):
+def perform_supervised_classification(layer, selected_classifier, classifier_params, classification_name, features):
     """Perform segmentation on the image data."""
     try:
         with st.spinner("Performing supervised classification..."):
@@ -171,16 +172,13 @@ def perform_supervised_classification(layer, selected_classifier, classifier_par
                 name="RF Classification", classifier_type=selected_classifier, classifier_params=classifier_params
             )
 
-            classification_layer, accuracy = classifier.execute(
-                layer,
-                samples=samples,
-                layer_manager=st.session_state.manager,
-                layer_name=classification_name,
+            classification_layer, accuracy, feature_importances = classifier.execute(
+                layer, samples=samples, layer_manager=st.session_state.manager, layer_name=classification_name, features=features
             )
 
             st.session_state.layers[classification_name] = classification_layer
             update_available_attributes()
-            return classification_layer, accuracy
+            return classification_layer, accuracy, feature_importances
     except Exception as e:
         st.error(f"Error during supervised classification: {str(e)}")
         return None
@@ -1176,6 +1174,19 @@ def render_supervised_classification(index):
                     random_state = st.number_input(
                         "Random Seed", min_value=0, max_value=2**32 - 1, value=42, step=1, key=f"no_of_seed_{index}"
                     )
+
+            features_options = (
+                st.session_state.layers[seg_layer_name]
+                .objects.drop(columns=["segment_id", "classification", "geometry"], errors="ignore")
+                .columns
+            )
+            features = st.multiselect(
+                "Select features ",
+                features_options,
+                # default=None,
+                key=f"classifier_feat_{index}",
+            )
+
             apply_button = st.button("Execute", key=f"execute_classification_{index}")
             if apply_button:
                 classifier_params = {"n_estimators": n_estimators, "oob_score": bool(oob_score), "random_state": random_state}
@@ -1186,8 +1197,8 @@ def render_supervised_classification(index):
                     st.error("Layer name already exists")
                     st.stop()
 
-                classification_layer, accuracy = perform_supervised_classification(
-                    layer, selected_classifier, classifier_params, classification_name
+                classification_layer, accuracy, feature_importances = perform_supervised_classification(
+                    layer, selected_classifier, classifier_params, classification_name, features
                 )
 
                 if classification_layer:
@@ -1198,16 +1209,25 @@ def render_supervised_classification(index):
                     fig = plot_classification(classification_layer, class_field="classification", class_color=class_color)
                     process_data["output_fig"] = fig
                     process_data["accuracy"] = accuracy
+                    process_data["feature_importances"] = feature_importances
+
                     # process_data["layer_type"] = "classification"
                     # st.session_state.classification_fig = fig  # Store the figure in session state
             if "accuracy" in process_data:
                 st.write(f"OOB Score: {process_data['accuracy']}")
+
             if "output_fig" in process_data:
                 st.pyplot(process_data["output_fig"])
-            # st.write(st.session_state.layers)
+            if "feature_importances" in process_data:
+                fi = process_data["feature_importances"]
+                fig, ax = plt.subplots(figsize=(6, 4))
+                fi.plot.bar(ax=ax)
+                ax.set_title("Importances")
+                ax.set_xlabel("Features")
+                ax.set_ylabel("Importance (%)")
+                plt.tight_layout()
+                st.pyplot(fig)
 
-            # if "classification_fig" in st.session_state:
-            #     st.pyplot(st.session_state.classification_fig)
         else:
             st.error("Error: Sample data are not created")
     except Exception as e:

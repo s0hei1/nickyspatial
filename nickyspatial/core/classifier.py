@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Implements supervised classification algorithms to classify the segments."""
 
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
 from .layer import Layer
@@ -26,7 +27,7 @@ class SupervisedClassifier:
         self.training_layer = None
         self.classifier = None
         self.name = name if name else "Supervised_Classification"
-        # self.samples=None
+        self.features = None
 
     def _training_sample(self, layer, samples):
         """Create vector objects from segments.
@@ -52,7 +53,7 @@ class SupervisedClassifier:
         self.training_layer = layer
         return layer
 
-    def _train(self):
+    def _train(self, features):
         """Calculate statistics for segments based on image data.
 
         Parameters:
@@ -64,18 +65,24 @@ class SupervisedClassifier:
         bands : list of str
             Names of the bands
         """
-        x = self.training_layer.drop(columns=["segment_id", "classification", "geometry"], errors="ignore")
+        self.features = features
+        if not self.features:
+            self.features = self.training_layer.columns
+        self.features = [col for col in self.features if col not in ["segment_id", "classification", "geometry"]]
+        x = self.training_layer[self.features]
+
         y = self.training_layer["classification"]
 
         if self.classifier_type == "Random Forest":
             self.classifier = RandomForestClassifier(**self.classifier_params)
-
             self.classifier.fit(x, y)
+            feature_importances = pd.Series(self.classifier.feature_importances_, index=self.features) * 100
+            feature_importances = feature_importances.sort_values(ascending=False)
 
         test_accuracy = self.classifier.oob_score_
         # print("OOB Score:", self.classifier.oob_score_)
 
-        return self.classifier, test_accuracy
+        return self.classifier, test_accuracy, feature_importances
 
     def _prediction(self, layer):
         """Perform classification prediction on input layer features.
@@ -93,20 +100,19 @@ class SupervisedClassifier:
 
         """
         layer["classification"] = ""
+        # if not features:
+        #     x = layer.drop(columns=["segment_id", "classification", "geometry"], errors="ignore")
+        # else:
+        x = layer[self.features]
+
         # print(layer.columns)
-        x = layer.drop(columns=["segment_id", "classification", "geometry"], errors="ignore")
+        # x = layer.drop(columns=["segment_id", "classification", "geometry"], errors="ignore")
 
         predictions = self.classifier.predict(x)
         layer.loc[layer["classification"] == "", "classification"] = predictions
         return layer
 
-    def execute(
-        self,
-        source_layer,
-        samples,
-        layer_manager=None,
-        layer_name=None,
-    ):
+    def execute(self, source_layer, samples, layer_manager=None, layer_name=None, features=None):
         """Execute the supervised classification workflow on the source layer.
 
         This method creates a new layer by copying the input source layer, training a classifier
@@ -138,7 +144,8 @@ class SupervisedClassifier:
 
         layer = source_layer.objects.copy()
         self._training_sample(layer, samples)
-        _, accuracy = self._train()
+        _, accuracy, feature_importances = self._train(features)
+
         layer = self._prediction(layer)
 
         result_layer.objects = layer
@@ -150,4 +157,4 @@ class SupervisedClassifier:
         if layer_manager:
             layer_manager.add_layer(result_layer)
 
-        return result_layer, accuracy
+        return result_layer, accuracy, feature_importances
