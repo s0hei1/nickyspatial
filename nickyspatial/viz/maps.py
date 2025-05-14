@@ -89,7 +89,7 @@ def plot_layer(
     return fig
 
 
-def plot_layer_interactive(layer, image_data=None,figsize=(10,8)):
+def plot_layer_interactive(layer, image_data=None, figsize=(10, 8)):
     """Interactive plot of a layer with widgets and working click."""
     # attribute_options = [None] + list(layer.objects.columns)
     # attribute_widget = widgets.Dropdown(
@@ -263,11 +263,7 @@ def plot_layer_interactive(layer, image_data=None,figsize=(10,8)):
     display(ui, out_fig, controls)
 
 
-def plot_classification(layer, 
-                        class_field="classification", 
-                        figsize=(12, 10), 
-                        legend=True, 
-                        class_color=None):
+def plot_classification(layer, class_field="classification", figsize=(12, 10), legend=True, class_color=None):
     """Plot classified segments with different colors for each class."""
     fig, ax = plt.subplots(figsize=figsize)
     if not class_color:
@@ -407,6 +403,7 @@ def plot_comparison(
 
     return fig
 
+
 def plot_sample(
     layer,
     image_data=None,
@@ -415,10 +412,9 @@ def plot_sample(
     class_field="classification",
     figsize=(8, 6),
     class_color=None,
-    legend=True
+    legend=True,
 ):
-    """
-    Plot classified segments on top of RGB or grayscale image data.
+    """Plot classified segments on top of RGB or grayscale image data.
 
     Parameters:
     - layer: Layer object with .objects (GeoDataFrame)
@@ -443,6 +439,7 @@ def plot_sample(
             rgb = np.stack([r_norm, g_norm, b_norm], axis=2)
             if transform:
                 from rasterio.plot import plotting_extent
+
                 extent = plotting_extent(image_data[0], transform=transform)
                 ax.imshow(rgb, extent=extent)
             else:
@@ -452,6 +449,7 @@ def plot_sample(
             gray_norm = (gray - gray.min()) / (gray.max() - gray.min() + 1e-10)
             if transform:
                 from rasterio.plot import plotting_extent
+
                 extent = plotting_extent(gray, transform=transform)
                 ax.imshow(gray_norm, cmap="gray", extent=extent)
             else:
@@ -461,7 +459,7 @@ def plot_sample(
     gdf = layer.objects.copy()
     if gdf.crs is None:
         raise ValueError("GeoDataFrame has no CRS")
-    
+
     if not class_color:
         class_color = {}
     if class_field not in gdf.columns:
@@ -476,14 +474,12 @@ def plot_sample(
             color_hex = class_color[class_value]
         else:
             rgb_val = base_colors[idx % len(base_colors)][:3]
-            color_hex = "#{:02x}{:02x}{:02x}".format(int(rgb_val[0]*255), int(rgb_val[1]*255), int(rgb_val[2]*255))
+            color_hex = "#{:02x}{:02x}{:02x}".format(int(rgb_val[0] * 255), int(rgb_val[1] * 255), int(rgb_val[2] * 255))
             class_color[class_value] = color_hex
         class_map[class_value] = color_hex
 
     for class_value in class_values:
-        gdf[gdf[class_field] == class_value].plot(
-            ax=ax, facecolor=class_map[class_value], edgecolor='black', linewidth=0.5
-        )
+        gdf[gdf[class_field] == class_value].plot(ax=ax, facecolor=class_map[class_value], edgecolor="black", linewidth=0.5)
 
     if legend:
         handles = [mpatches.Patch(color=class_map[val], label=val) for val in class_values]
@@ -492,4 +488,3 @@ def plot_sample(
     ax.set_title("Classification on RGB Image")
     ax.set_axis_off()
     return fig
-

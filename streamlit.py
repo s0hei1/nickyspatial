@@ -986,6 +986,31 @@ def render_select_samples(index):
 
             st.markdown("### Click Segments on Interactive Map")
 
+            # st.markdown("#### Load Example Rule Sets")
+
+            if st.button("Load Training Sample Example", key=f"load_sample_{index}"):
+                st.session_state.classes = {
+                    "water": {"color": "#1535fd", "sample_ids": [163, 282, 78, 445]},
+                    "built-up": {"color": "#f52c2f", "sample_ids": [132, 118, 295, 380]},
+                    "veg": {"color": "#0f691b", "sample_ids": [247, 422, 68, 561, 485]},
+                }
+                # st.session_state["classes"]=
+                # has_ndvi = False
+                # for _layer_name, layer in st.session_state.layers.items():
+
+                #     if "NDVI" in layer.objects.columns:
+                #         has_ndvi = True
+                #         break
+
+                # if not has_ndvi:
+                #     st.warning("NDVI not calculated for any layer. Please calculate NDVI first in the Segmentation tab.")
+                # else:
+                #     example_rule_sets = create_example_rule_sets()
+
+                #     if example_rule_sets:
+                #         st.session_state.rule_sets.update(example_rule_sets)
+                #         st.success("Example rule sets loaded successfully!")
+
             # Select the input layer
             col2a, col2b = st.columns([0.5, 0.5])
             with col2a:
@@ -1104,6 +1129,8 @@ def render_select_samples(index):
                 name="Colored Segments", image=tmp_path, bounds=bounds, opacity=0.8, interactive=True, cross_origin=False
             ).add_to(fmap)
             folium.LayerControl().add_to(fmap)
+
+            # st.write(st.session_state.classes)
 
             # Display the map and handle click events
             click_info = st_folium(fmap, height=600, width=1000, key=f"map_folium_{index}")
