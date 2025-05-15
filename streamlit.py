@@ -39,7 +39,7 @@ from nickyspatial import (
     read_raster,
 )
 
-st.set_page_config(page_title="nickyspatial - Remote Sensing Analysis", page_icon="🛰️", layout="wide")
+st.set_page_config(page_title="nickyspatial - Remote Sensing Analysis", page_icon="#", layout="wide")
 
 
 @st.cache_resource
@@ -390,7 +390,7 @@ def render_segmentation(index):
             "Compactness",
             min_value=0.1,
             max_value=5.0,
-            value=1.0,
+            value=0.1,
             step=0.1,
             help="Controls the compactness of segments. Higher values create more compact segments.",
             key=f"compactness_param_{index}",
@@ -1691,10 +1691,6 @@ def render_welcome_screen():
     - Export results in vector and raster formats
     """)
 
-    st.image(
-        "https://cdn.pixabay.com/photo/2018/04/11/19/52/satellite-3311245_960_720.jpg", caption="Remote Sensing Image Analysis"
-    )
-
 
 def render_app_info():
     """Render the application information in the sidebar."""
@@ -1728,7 +1724,9 @@ def main():
                 f.write(uploaded_file.getbuffer())
             _load_success = load_raster(temp_file)
     else:
-        sample_data_path = st.sidebar.text_input("Path to sample data:", "data/sample.tif")
+        sample_data_path = st.sidebar.text_input(
+            "Path to sample data:", "https://github.com/kshitijrajsharma/nickyspatial/raw/refs/heads/master/data/sample.tif"
+        )
         if st.sidebar.button("Load Sample Data"):
             _load_success = load_raster(sample_data_path)
 
