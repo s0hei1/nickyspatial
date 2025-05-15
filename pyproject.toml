@@ -32,6 +32,7 @@ dependencies = [
     "streamlit-folium>=0.24.1",
     "ipywidgets>=8.1.7",
     "ipympl>=0.9.7",
+    "plotly>=6.0.1",
 ]
 
 [project.urls]

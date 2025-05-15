@@ -7,6 +7,7 @@ import ipywidgets as widgets
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
+import plotly.graph_objects as go
 from IPython.display import display
 from matplotlib.colors import ListedColormap
 from skimage.segmentation import mark_boundaries
@@ -91,6 +92,11 @@ def plot_layer(
 
 def plot_layer_interactive(layer, image_data=None, figsize=(10, 8)):
     """Interactive plot of a layer with widgets and working click."""
+    """
+    %matplotlib widget
+    plot_layer_interactive(layer=segmentation_layer,image_data=image_data,figsize=(10,8))
+    Not supported in google collab
+    """
     # attribute_options = [None] + list(layer.objects.columns)
     # attribute_widget = widgets.Dropdown(
     #     options=attribute_options,
@@ -488,3 +494,70 @@ def plot_sample(
     ax.set_title("Classification on RGB Image")
     ax.set_axis_off()
     return fig
+
+
+def plot_layer_interactive_plotly(layer, image_data, rgb_bands=(0, 1, 2), show_boundaries=True, figsize=(800, 400)):
+    """Display an interactive RGB image with segment boundaries and hoverable segment IDs using Plotly.
+
+    Run in google collab as well.
+
+    Parameters:
+    ----------
+    layer : object
+        An object with a `.raster` attribute representing the labeled segmentation layer
+        (e.g., output from a segmentation algorithm, such as SLIC).
+    image_data : image data to be visualized.
+    rgb_bands : tuple of int, optional
+        Tuple of three integers specifying which bands to use for the RGB composite (default is (0, 1, 2)).
+    show_boundaries : bool, optional
+        Whether to overlay the segment boundaries on the RGB image (default is True).
+    figsize : tuple of int, optional
+        Tuple specifying the width and height of the interactive Plotly figure in pixels (default is (800, 400)).
+
+    Returns:
+    -------
+    None
+        The function displays the interactive plot directly in the output cell in a Jupyter Notebook.
+
+    Notes:
+    -----
+    - Segment boundaries are drawn using `skimage.segmentation.mark_boundaries`.
+    - Hovering over the image displays the segment ID from `layer.raster`.
+
+    """
+
+    def get_rgb_image(r, g, b):
+        r_norm = np.clip((r - r.min()) / (r.max() - r.min() + 1e-10), 0, 1)
+        g_norm = np.clip((g - g.min()) / (g.max() - g.min() + 1e-10), 0, 1)
+        b_norm = np.clip((b - b.min()) / (b.max() - b.min() + 1e-10), 0, 1)
+        return np.stack([r_norm, g_norm, b_norm], axis=2)
+
+    def update_plot(rgb_bands, show_boundaries=True):
+        rgb_image = get_rgb_image(image_data[rgb_bands[0]], image_data[rgb_bands[1]], image_data[rgb_bands[2]])
+
+        if show_boundaries:
+            rgb_image = mark_boundaries(rgb_image, layer.raster, color=(1, 1, 0), mode="thick")
+
+        fig = go.Figure(data=go.Image(z=(rgb_image * 255).astype(np.uint8)))
+
+        # Add segment ID overlay with hover
+        fig.add_trace(
+            go.Heatmap(
+                z=layer.raster,
+                opacity=0,
+                hoverinfo="z",
+                showscale=False,
+                hovertemplate="Segment ID: %{z}<extra></extra>",
+                colorscale="gray",
+            )
+        )
+
+        fig.update_layout(
+            title="Hover to see Segment ID", dragmode="pan", margin=dict(l=0, r=0, t=30, b=0), height=figsize[1], width=figsize[0]
+        )
+        fig.update_xaxes(showticklabels=False)
+        fig.update_yaxes(showticklabels=False, scaleanchor="x")
+
+        fig.show()
+
+    update_plot(rgb_bands=rgb_bands, show_boundaries=show_boundaries)
