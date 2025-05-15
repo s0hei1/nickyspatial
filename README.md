@@ -33,6 +33,7 @@ nickyspatial/
 │   ├── layer.py        # Layer class and management
 │   ├── segmentation.py # Segmentation algorithms
 │   └── rules.py        # Rule engine
+|   └── classifier.py   # Classification algorithms
 ├── stats/
 │   ├── __init__.py
 │   ├── basic.py        # Basic statistics (min, max, mean, etc.)
