@@ -55,5 +55,5 @@ Once you have UV installed, dependencies synced, and pre-commit hooks set, youâ€
 #### Bring up frontend
 
 ```bash
-streamlit run streamlit.py
+uv run streamlit run streamlit.py
 ```
