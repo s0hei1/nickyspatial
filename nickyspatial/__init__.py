@@ -41,4 +41,6 @@ from .viz.maps import (
     plot_comparison,
     plot_layer,
     plot_layer_interactive,
+    plot_sample,
+    plot_layer_interactive_plotly,
 )

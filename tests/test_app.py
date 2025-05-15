@@ -193,7 +193,7 @@ def test_full_workflow(test_raster_path):
     # Step 3: RF Supervised Classification implementation
     params = {"n_estimators": 100, "oob_score": True, "random_state": 42}
     rf_classification = SupervisedClassifier(name="RF Classification", classifier_type="Random Forest", classifier_params=params)
-    rf_classification_layer, accuracy = rf_classification.execute(
+    rf_classification_layer, accuracy, feature_importances = rf_classification.execute(
         segmentation_layer,
         samples=samples,
         layer_manager=manager,
