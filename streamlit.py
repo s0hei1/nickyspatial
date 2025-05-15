@@ -96,8 +96,9 @@ def load_raster(file_path):
             st.session_state.transform = transform
             st.session_state.crs = crs
             st.session_state.manager = LayerManager()
-            st.session_state.layers = {}
-            st.session_state.rule_sets = {}
+            # st.session_state.layers = {}
+            # st.session_state.rule_sets = {}
+            print(st.session_state.layers, "hvchdvhc")
 
             num_bands = image_data.shape[0]
             default_mappings = {}
@@ -363,125 +364,130 @@ def create_example_rule_sets():
 
 def render_segmentation(index):
     """Render the segmentation tab for image segmentation and feature calculation."""
-    st.markdown("## Image Segmentation")
-    st.write("Configure segmentation parameters and run the algorithm")
-    process_data = st.session_state.processes[index]
-    if "params" not in process_data:
-        process_data["params"] = {}
+    try:
+        st.markdown("## Image Segmentation")
+        st.write("Configure segmentation parameters and run the algorithm")
+        process_data = st.session_state.processes[index]
+        if "params" not in process_data:
+            process_data["params"] = {}
 
-    col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3)
 
-    with col1:
-        segmentation_name = st.text_input("Segmentation Layer Name", "Base_Segmentation", key=f"seg_name_{index}")
-    with col2:
-        scale_param = st.slider(
-            "Scale Parameter",
-            min_value=5,
-            max_value=100,
-            value=40,
-            step=5,
-            help="Controls the size of segments. Higher values create larger segments.",
-            key=f"scale_param_{index}",
-        )
-    with col3:
-        compactness_param = st.slider(
-            "Compactness",
-            min_value=0.1,
-            max_value=5.0,
-            value=1.0,
-            step=0.1,
-            help="Controls the compactness of segments. Higher values create more compact segments.",
-            key=f"compactness_param_{index}",
-        )
-
-    # st.subheader("Configure Band Mappings")
-    st.markdown("#### Configure Band Mappings")
-    st.write("Set up mappings for spectral bands to use in indices and analysis")
-
-    # Get raw bands from the image data
-    raw_bands = [f"band_{i + 1}" for i in range(st.session_state.image_data.shape[0])]
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        st.session_state.band_mappings["blue"] = st.selectbox(
-            "Blue band mapping",
-            raw_bands,
-            index=raw_bands.index(st.session_state.band_mappings.get("blue", raw_bands[0]).replace("_mean", ""))
-            if "blue" in st.session_state.band_mappings
-            else 0,
-            key=f"blue_band_{index}",
-        )
-    with col2:
-        st.session_state.band_mappings["green"] = st.selectbox(
-            "Green band mapping",
-            raw_bands,
-            index=raw_bands.index(
-                st.session_state.band_mappings.get("green", raw_bands[min(1, len(raw_bands) - 1)]).replace("_mean", "")
+        with col1:
+            segmentation_name = st.text_input("Segmentation Layer Name", "Base_Segmentation", key=f"seg_name_{index}")
+        with col2:
+            scale_param = st.slider(
+                "Scale Parameter",
+                min_value=5,
+                max_value=100,
+                value=20,
+                step=5,
+                help="Controls the size of segments. Higher values create larger segments.",
+                key=f"scale_param_{index}",
             )
-            if "green" in st.session_state.band_mappings
-            else min(1, len(raw_bands) - 1),
-            key=f"green_band_{index}",
-        )
-    with col3:
-        st.session_state.band_mappings["red"] = st.selectbox(
-            "Red band mapping",
-            raw_bands,
-            index=raw_bands.index(
-                st.session_state.band_mappings.get("red", raw_bands[min(2, len(raw_bands) - 1)]).replace("_mean", "")
+        with col3:
+            compactness_param = st.slider(
+                "Compactness",
+                min_value=0.1,
+                max_value=5.0,
+                value=0.5,
+                step=0.1,
+                help="Controls the compactness of segments. Higher values create more compact segments.",
+                key=f"compactness_param_{index}",
             )
-            if "red" in st.session_state.band_mappings
-            else min(2, len(raw_bands) - 1),
-            key=f"red_band_{index}",
-        )
-    with col4:
-        if len(raw_bands) > 3:
-            st.session_state.band_mappings["nir"] = st.selectbox(
-                "NIR band mapping",
+
+        # st.subheader("Configure Band Mappings")
+        st.markdown("#### Configure Band Mappings")
+        st.write("Set up mappings for spectral bands to use in indices and analysis")
+
+        # Get raw bands from the image data
+        raw_bands = [f"band_{i + 1}" for i in range(st.session_state.image_data.shape[0])]
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.session_state.band_mappings["blue"] = st.selectbox(
+                "Blue band mapping",
+                raw_bands,
+                index=raw_bands.index(st.session_state.band_mappings.get("blue", raw_bands[0]).replace("_mean", ""))
+                if "blue" in st.session_state.band_mappings
+                else 0,
+                key=f"blue_band_{index}",
+            )
+        with col2:
+            st.session_state.band_mappings["green"] = st.selectbox(
+                "Green band mapping",
                 raw_bands,
                 index=raw_bands.index(
-                    st.session_state.band_mappings.get("nir", raw_bands[min(3, len(raw_bands) - 1)]).replace("_mean", "")
+                    st.session_state.band_mappings.get("green", raw_bands[min(1, len(raw_bands) - 1)]).replace("_mean", "")
                 )
-                if "nir" in st.session_state.band_mappings
-                else min(3, len(raw_bands) - 1),
-                key=f"nir_band_{index}",
+                if "green" in st.session_state.band_mappings
+                else min(1, len(raw_bands) - 1),
+                key=f"green_band_{index}",
             )
-            # process_data["params"]["segmentation_name"] = segmentation_name
+        with col3:
+            st.session_state.band_mappings["red"] = st.selectbox(
+                "Red band mapping",
+                raw_bands,
+                index=raw_bands.index(
+                    st.session_state.band_mappings.get("red", raw_bands[min(2, len(raw_bands) - 1)]).replace("_mean", "")
+                )
+                if "red" in st.session_state.band_mappings
+                else min(2, len(raw_bands) - 1),
+                key=f"red_band_{index}",
+            )
+        with col4:
+            if len(raw_bands) > 3:
+                st.session_state.band_mappings["nir"] = st.selectbox(
+                    "NIR band mapping",
+                    raw_bands,
+                    index=raw_bands.index(
+                        st.session_state.band_mappings.get("nir", raw_bands[min(3, len(raw_bands) - 1)]).replace("_mean", "")
+                    )
+                    if "nir" in st.session_state.band_mappings
+                    else min(3, len(raw_bands) - 1),
+                    key=f"nir_band_{index}",
+                )
+                # process_data["params"]["segmentation_name"] = segmentation_name
 
-    for key in st.session_state.band_mappings:
-        if not st.session_state.band_mappings[key].endswith("_mean"):
-            st.session_state.band_mappings[key] = f"{st.session_state.band_mappings[key]}_mean"
+        for key in st.session_state.band_mappings:
+            if not st.session_state.band_mappings[key].endswith("_mean"):
+                st.session_state.band_mappings[key] = f"{st.session_state.band_mappings[key]}_mean"
 
-    segmentation_button = st.button("Run Segmentation", key=f"run_seg_{index}")
+        segmentation_button = st.button("Run Segmentation", key=f"run_seg_{index}")
 
-    if segmentation_button:
-        if segmentation_name in list(st.session_state.layers.keys()):
-            st.error("Layer name already exists")
-            st.stop()
-        segmentation_layer = perform_segmentation(
-            st.session_state.image_data,
-            st.session_state.transform,
-            st.session_state.crs,
-            scale_param,
-            compactness_param,
-            segmentation_name,
-        )
-
-        if segmentation_layer:
-            # print(type(segmentation_layer),"type seg layer")
-            fig = plot_layer(
-                segmentation_layer,
+        if segmentation_button:
+            if segmentation_name in list(st.session_state.layers.keys()):
+                st.error("Layer name already exists")
+                st.stop()
+            segmentation_layer = perform_segmentation(
                 st.session_state.image_data,
-                rgb_bands=(3, 2, 1),  # Adjusted for 0-indexed bands
-                show_boundaries=True,
+                st.session_state.transform,
+                st.session_state.crs,
+                scale_param,
+                compactness_param,
+                segmentation_name,
             )
-            process_data["output_fig"] = fig
-            # process_data["layer_type"] = "segmentation"
-        st.success(f"Segmentation '{segmentation_name}' completed successfully!")
 
-    if "output_fig" in process_data:
-        st.pyplot(process_data["output_fig"])
-        # st.pyplot(fig)
+            # st.write(segmentation_layer)
+
+            if segmentation_layer:
+                # print(type(segmentation_layer),"type seg layer")
+                fig = plot_layer(
+                    segmentation_layer,
+                    st.session_state.image_data,
+                    rgb_bands=(3, 2, 1),  # Adjusted for 0-indexed bands
+                    show_boundaries=True,
+                )
+                process_data["output_fig"] = fig
+                # process_data["layer_type"] = "segmentation"
+            st.success(f"Segmentation '{segmentation_name}' completed successfully!")
+
+        if "output_fig" in process_data:
+            st.pyplot(process_data["output_fig"])
+            # st.pyplot(fig)
+    except Exception as e:
+        st.error(f"error: {str(e)}")
 
 
 def render_calculate_features(index):
@@ -910,11 +916,8 @@ def render_select_samples(index):
                 else:
                     st.error("Please enter a class name.")
 
-            selected_class = st.radio("Select Class", list(st.session_state.classes.keys()), key=f"class_radio_{index}")
-
             st.markdown("##### Classes")
             class_names = list(st.session_state.classes.keys())
-
             for idx, class_name in enumerate(class_names):
                 # for class_name, class_info in st.session_state.classes.items():
 
@@ -941,7 +944,6 @@ def render_select_samples(index):
                     if st.button("🗑️", key=f"delete_{class_name}"):
                         del st.session_state.classes[class_name]
                         st.rerun()
-
             if st.session_state.edit_mode and st.session_state.edit_index is not None:
                 edit_idx = st.session_state.edit_index
                 class_name = class_names[edit_idx]
@@ -972,6 +974,8 @@ def render_select_samples(index):
                         st.session_state.edit_mode = False
                         st.session_state.edit_index = None
 
+            selected_class = st.radio("Select Class", list(st.session_state.classes.keys()), key=f"class_radio_{index}")
+
         with col2:
             st.markdown(
                 """
@@ -990,28 +994,16 @@ def render_select_samples(index):
 
             if st.button("Load Training Sample Example", key=f"load_sample_{index}"):
                 st.session_state.classes = {
-                    "water": {"color": "#1535fd", "sample_ids": [163, 282, 78, 445]},
-                    "built-up": {"color": "#f52c2f", "sample_ids": [132, 118, 295, 380]},
-                    "veg": {"color": "#0f691b", "sample_ids": [247, 422, 68, 561, 485]},
+                    "Water": {"color": "#3437c2", "sample_ids": [102, 384, 659, 1142, 1662, 1710, 2113, 2182, 2481, 1024]},
+                    "Builtup": {"color": "#de1421", "sample_ids": [467, 1102, 1431, 1984, 1227, 1736, 774, 1065]},
+                    "Vegetation": {"color": "#0f6b2f", "sample_ids": [832, 1778, 2035, 1417, 1263, 242, 2049, 2397]},
                 }
-                # st.session_state["classes"]=
-                # has_ndvi = False
-                # for _layer_name, layer in st.session_state.layers.items():
-
-                #     if "NDVI" in layer.objects.columns:
-                #         has_ndvi = True
-                #         break
-
-                # if not has_ndvi:
-                #     st.warning("NDVI not calculated for any layer. Please calculate NDVI first in the Segmentation tab.")
-                # else:
-                #     example_rule_sets = create_example_rule_sets()
-
-                #     if example_rule_sets:
-                #         st.session_state.rule_sets.update(example_rule_sets)
-                #         st.success("Example rule sets loaded successfully!")
 
             # Select the input layer
+            layers_keys = list(st.session_state.layers.keys())
+            if not layers_keys:
+                st.warning("No segmentation layers available in session state.")
+
             col2a, col2b = st.columns([0.5, 0.5])
             with col2a:
                 input_layer = st.selectbox(
@@ -1110,7 +1102,6 @@ def render_select_samples(index):
             # Save overlay to a temporary file
             tmp_path = NamedTemporaryFile(suffix=".png", delete=False).name
             Image.fromarray(overlay_uint8).save(tmp_path)
-
             # Calculate map bounds in EPSG:4326
             height, width = segments.shape
             top_left_utm = rasterio.transform.xy(transform, 0, 0, offset="ul")
@@ -1124,7 +1115,6 @@ def render_select_samples(index):
             center_lat = (top_left_latlon[1] + bottom_right_latlon[1]) / 2
             center_lon = (top_left_latlon[0] + bottom_right_latlon[0]) / 2
             fmap = folium.Map(location=[center_lat, center_lon], zoom_start=15)
-
             ImageOverlay(
                 name="Colored Segments", image=tmp_path, bounds=bounds, opacity=0.8, interactive=True, cross_origin=False
             ).add_to(fmap)
