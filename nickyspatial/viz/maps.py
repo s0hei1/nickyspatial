@@ -491,7 +491,7 @@ def plot_sample(
         handles = [mpatches.Patch(color=class_map[val], label=val) for val in class_values]
         ax.legend(handles=handles, loc="upper right", title=class_field)
 
-    ax.set_title("Classification on RGB Image")
+    ax.set_title("Sample Data Visualization")
     ax.set_axis_off()
     return fig
 
