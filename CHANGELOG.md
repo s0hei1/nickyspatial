@@ -1,3 +1,17 @@
+## v0.2.0 (2025-05-15)
+
+### Feat
+
+- add plot_sample function and updae example usecase
+- display OOB score after classification, streamlit: revised UI
+
+### Fix
+
+- merge issue
+- error in interactive map for sample collection  in google collab
+- **Dockerfile**: change exposed port from 8501 to 8080
+- merge issue
+
 ## v0.1.1 (2025-05-10)
 
 ### Fix
