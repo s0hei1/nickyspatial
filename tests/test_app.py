@@ -17,8 +17,8 @@ from nickyspatial import (
     EnclosedByRuleSet,
     LayerManager,
     MergeRuleSet,
-    MultiResolutionSegmentation,
     RuleSet,
+    SlicSegmentation,
     SupervisedClassifier,
     TouchedByRuleSet,
     attach_area_stats,
@@ -74,7 +74,7 @@ def test_full_workflow(test_raster_path):
     assert image_data is not None, "Failed to read image data."
 
     # Step 3: Perform segmentation.
-    segmenter = MultiResolutionSegmentation(scale=20, compactness=1)
+    segmenter = SlicSegmentation(scale=20, compactness=1)
     segmentation_layer = segmenter.execute(image_data, transform, crs, layer_manager=manager, layer_name="Base_Segmentation")
     assert segmentation_layer is not None, "Segmentation layer was not created."
 
@@ -179,7 +179,7 @@ def test_full_workflow(test_raster_path):
 
     """Supervised Classification Test Start"""
     # Step 1: Perform segmentation.
-    segmenter = MultiResolutionSegmentation(scale=20, compactness=1)
+    segmenter = SlicSegmentation(scale=20, compactness=1)
     segmentation_layer = segmenter.execute(image_data, transform, crs, layer_manager=manager, layer_name="Base_Segmentation")
     assert segmentation_layer is not None, "Segmentation layer was not created."
 

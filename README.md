@@ -13,7 +13,7 @@ An open-source object-based image analysis library for remote sensing.
 > [!WARNING]
 > This project is under active development and lot of its functionality is still in my head yet to code.
 
-Find Demo Frontend Here : https://nickyspatial-gpoqz.ondigitalocean.app/ 
+Find Demo Frontend Here : https://nickyspatial-gpoqz.ondigitalocean.app/
 
 ## Description
 

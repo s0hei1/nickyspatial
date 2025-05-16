@@ -8,8 +8,8 @@ import os
 
 from nickyspatial import (
     LayerManager,
-    MultiResolutionSegmentation,
     RuleSet,
+    SlicSegmentation,
     attach_area_stats,
     attach_ndvi,
     attach_shape_metrics,
@@ -37,7 +37,7 @@ def run_example(raster_path=None):
     else:
         raise ValueError(f"Raster file not found at {raster_path}. Please provide a valid raster file.")
     print("\nPerforming segmentation...")
-    segmenter = MultiResolutionSegmentation(
+    segmenter = SlicSegmentation(
         scale=40,
         compactness=1,
     )

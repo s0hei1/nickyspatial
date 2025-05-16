@@ -25,8 +25,8 @@ from nickyspatial import (
     EnclosedByRuleSet,
     LayerManager,
     MergeRuleSet,
-    MultiResolutionSegmentation,
     RuleSet,
+    SlicSegmentation,
     SupervisedClassifier,
     TouchedByRuleSet,
     attach_area_stats,
@@ -140,7 +140,7 @@ def perform_segmentation(image_data, transform, crs, scale_param, compactness_pa
     """Perform segmentation on the image data."""
     try:
         with st.spinner("Performing segmentation..."):
-            segmenter = MultiResolutionSegmentation(
+            segmenter = SlicSegmentation(
                 scale=scale_param,
                 compactness=compactness_param,
             )

@@ -22,7 +22,7 @@ __author__ = "Kshitij Raj Sharma"
 from .core.classifier import SupervisedClassifier
 from .core.layer import Layer, LayerManager
 from .core.rules import EnclosedByRuleSet, MergeRuleSet, Rule, RuleSet, TouchedByRuleSet
-from .core.segmentation import MultiResolutionSegmentation
+from .core.segmentation import SlicSegmentation
 from .filters.spatial import merge_small_segments, select_by_area, smooth_boundaries
 from .filters.spectral import enhance_contrast, spectral_filter
 from .io.raster import layer_to_raster, read_raster, write_raster
@@ -41,6 +41,6 @@ from .viz.maps import (
     plot_comparison,
     plot_layer,
     plot_layer_interactive,
-    plot_sample,
     plot_layer_interactive_plotly,
+    plot_sample,
 )

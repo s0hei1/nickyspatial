@@ -2,7 +2,7 @@
 """Implements segmentation algorithms to partition images into meaningful region objects.
 
 The functions here might apply clustering or region-growing techniques, aiding object-based remote sensing analysis.
-This module includes the MultiResolutionSegmentation class, which implements a bottom-up region-growing algorithm
+This module includes the SlicSegmentation class, which implements a bottom-up region-growing algorithm
 """
 
 import warnings
@@ -16,7 +16,7 @@ from skimage import segmentation
 from .layer import Layer
 
 
-class MultiResolutionSegmentation:
+class SlicSegmentation:
     """Implementation of Multiresolution segmentation algorithm.
 
     This algorithm segments an image using a bottom-up region-growing approach
