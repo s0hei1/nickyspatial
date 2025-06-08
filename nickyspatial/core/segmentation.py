@@ -6,6 +6,8 @@ This module includes the SlicSegmentation class, which implements a bottom-up re
 """
 
 import warnings
+from numbers import Number
+from typing import Callable, Sequence
 
 import geopandas as gpd
 import numpy as np
@@ -14,6 +16,7 @@ from shapely.geometry import Polygon
 from skimage import segmentation
 
 from .layer import Layer
+from .playground import y_size
 
 
 class SlicSegmentation:
@@ -226,3 +229,67 @@ class SlicSegmentation:
                 segment_objects.at[idx, f"{band_name}_min"] = min_val
                 segment_objects.at[idx, f"{band_name}_max"] = max_val
                 segment_objects.at[idx, f"{band_name}_median"] = median_val
+
+
+ImageData = Sequence[Sequence[Number]]
+
+def compute_split_couple_slices(x_size : int, y_size : int, * ,split_size : tuple[int, int]) -> Sequence[Sequence[slice]]:
+    x_step = x_size // split_size[0]
+    y_step = y_size // split_size[1]
+
+    couple_slices = []
+
+    for i in range(split_size[0]):
+        for j in range(split_size[1]):
+            x_slice = slice(i*x_step , (i+1)*x_step)
+            y_slice = slice(j*y_step, (j+1)*y_step)
+            couple_slice = (x_slice, y_slice)
+            couple_slices.append(couple_slice)
+
+    return couple_slices
+
+def compute_variance(image_slice : ImageData) -> float:
+    pass
+
+class QuadTreeSegmentation:
+
+    def __init__(self,
+                 threshold: int,
+                 homogeneity_method: Callable[..., float] = compute_variance,
+                 minimum_blocks_size = 16):
+
+        self.threshold = threshold
+        self.homogeneity_method = homogeneity_method
+        self.minimum_blocks_size = minimum_blocks_size
+
+    def split_to_4_slice(self, image_data: np.ndarray) -> Sequence[np.ndarray]:
+        x_size, y_size = image_data.shape
+
+        couple_slice = compute_split_couple_slices(x_size, y_size, split_size=(2, 2))
+        image_slices = []
+
+        for slc in couple_slice:
+            image_slice = image_data[slc[0], slc[1]]
+            image_slices.append(image_slice)
+
+        return image_slices
+
+    def execute(self, image_data : np.ndarray) -> Sequence[ImageData]:
+
+        segments = []
+
+        image_slices = self.split_to_4_slice(image_data)
+
+        for image_slice in image_slices:
+            homogeneity = self.homogeneity_method(image_slice)
+            if homogeneity < self.threshold or image_slice.size < self.minimum_blocks_size:
+                segments.append(image_slice)
+            else:
+                segments = segments + self.execute(image_slice)
+
+
+        return segments
+
+
+
+
